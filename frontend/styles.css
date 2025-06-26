@@ -1,0 +1,342 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+}
+
+body {
+    background-color: #0d1117;
+    overflow-x: hidden;
+}
+
+
+.login-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(13, 17, 23, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.login-box {
+    background: rgba(22, 27, 34, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    width: 400px;
+    animation: slideUp 0.7s ease-in-out;
+}
+
+.login-logo {
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+.login-box h2 {
+    margin-bottom: 30px;
+    color: #58a6ff;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.login-box .input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #21262d;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+.login-box input:focus {
+    outline: none;
+    border: 1px solid #58a6ff;
+}
+
+.login-box label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 14px;
+    color: #8b949e;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.login-box input:focus + label,
+.login-box input:not(:placeholder-shown) + label {
+    top: -10px;
+    left: 8px;
+    font-size: 12px;
+    color: #58a6ff;
+    background-color: #161b22;
+    padding: 0 4px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 14px;
+    background-color: #58a6ff;
+    border: none;
+    border-radius: 6px;
+    color: #0d1117;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-box button:hover {
+    background-color: #4793ff;
+    transform: translateY(-2px);
+}
+
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    background-color: #161b22;
+    padding: 20px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.hidden {
+    transform: translateX(-250px);
+}
+
+.sidebar.visible {
+    transform: translateX(0);
+}
+
+.sidebar .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.sidebar-menu {
+    list-style: none;
+    flex-grow: 1;
+}
+
+.sidebar-menu li {
+    margin: 20px 0;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.sidebar-menu li i {
+    margin-right: 10px;
+}
+
+.sidebar-menu li:hover {
+    background-color: #21262d;
+    transform: translateX(5px);
+}
+
+.sidebar-menu li.active {
+    background-color: #21262d;
+    color: #58a6ff;
+}
+
+.sidebar-menu .logout-btn {
+    margin-top: auto;
+    color: #ff6b6b;
+}
+
+.sidebar-menu .logout-btn:hover {
+    background-color: #21262d;
+    color: #ff8787;
+}
+
+
+.main-content {
+    margin-left: 0;
+    padding: 40px;
+    min-height: 100vh;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content:not(.expanded) {
+    margin-left: 250px;
+}
+
+
+.reportes-form {
+    background-color: #161b22;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.7s ease-in-out;
+}
+
+.reportes-form h2 {
+    color: #58a6ff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.reportes-form .form-group {
+    margin-bottom: 20px;
+}
+
+.reportes-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #c9d1d9;
+}
+
+.reportes-form input,
+.reportes-form select,
+.reportes-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #21262d;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+.reportes-form input:focus,
+.reportes-form select:focus,
+.reportes-form textarea:focus {
+    outline: none;
+    border: 1px solid #58a6ff;
+}
+
+.reportes-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.reportes-form .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #58a6ff;
+    border: none;
+    border-radius: 5px;
+    color: #0d1117;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reportes-form .submit-btn:hover {
+    background-color: #4793ff;
+}
+
+
+.notificaciones {
+    display: none;
+}
+
+.notificaciones h2 {
+    color: #58a6ff;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.notification-card {
+    background-color: #161b22;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.notification-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(88, 166, 255, 0.2);
+}
+
+.notification-card h3 {
+    color: #c9d1d9;
+    margin-bottom: 10px;
+}
+
+.notification-card p {
+    color: #8b949e;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes iconToggle {
+    0% { opacity: 0; transform: rotateY(90deg); }
+    100% { opacity: 1; transform: rotateY(0); }
+}
+
+
+.toggle-sidebar {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: #58a6ff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    z-index: 1001;
+    transition: background-color 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-sidebar:hover {
+    background-color: #4793ff;
+}
+
+.toggle-sidebar i {
+    font-size: 16px;
+    color: #0d1117;
+    transition: transform 0.3s ease;
+}
+
+.toggle-sidebar.active i {
+    animation: iconToggle 0.3s ease-in-out;
+}

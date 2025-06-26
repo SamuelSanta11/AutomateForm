@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automate Reportes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <img src="img/LogoAuto.jpg" alt="Automate Logo" class="login-logo">
+            <h2>Bienvenido a Automate</h2>
+            <form>
+                <div class="input-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" placeholder="Usuario" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="Contraseña" required>
+                </div>
+                <button type="button" onclick="hideLogin()">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+
+    <button class="toggle-sidebar" onclick="toggleSidebar()">
+        <i class="fas fa-bars" id="toggleIcon"></i>
+    </button>
+    <div class="sidebar hidden" id="sidebar">
+        <div class="logo">Automate</div>
+        <ul class="sidebar-menu">
+            <li class="active" onclick="showModule('reportes')"><i class="fas fa-file-alt"></i> Reportes</li>
+            <li onclick="showModule('notificaciones')"><i class="fas fa-bell"></i> Notificaciones</li>
+            <li class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</li>
+        </ul>
+    </div>
+
+    
+    <div class="main-content" id="mainContent">
+
+        <div class="reportes" id="reportesModule">
+            <form class="reportes-form" onsubmit="submitReport(event)">
+                <h2>Nuevo Reporte</h2>
+                <div class="form-group">
+                    <label for="machineName">Nombre de la Máquina</label>
+                    <input type="text" id="machineName" required>
+                </div>
+                <div class="form-group">
+                    <label for="incidentDateTime">Fecha y Hora del Incidente</label>
+                    <input type="datetime-local" id="incidentDateTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="failureCause">Causa del Fallo</label>
+                    <input type="text" id="failureCause" required>
+                </div>
+                <div class="form-group">
+                    <label for="dangerLevel">Nivel de Peligro</label>
+                    <select id="dangerLevel" required>
+                        <option value="baja">Baja</option>
+                        <option value="media">Media</option>
+                        <option value="alta">Alta</option>
+                        <option value="critica">Crítica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="incidentDescription">Descripción del Incidente</label>
+                    <textarea id="incidentDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="evidence">Evidencia (Imagen)</label>
+                    <input type="file" id="evidence" accept="image/*">
+                </div>
+                <button type="submit" class="submit-btn">Enviar Reporte</button>
+            </form>
+        </div>
+
+        
+        <div class="notificaciones" id="notificacionesModule">
+            <h2>Notificaciones</h2>
+            <div class="notification-card">
+                <h3>Reporte #001 - Máquina Alpha</h3>
+                <p><strong>Fecha:</strong> 2025-06-24 10:30</p>
+                <p><strong>Causa:</strong> Falla eléctrica</p>
+                <p><strong>Nivel:</strong> Media</p>
+                <p><strong>Descripción:</strong> Corte de energía en el sector principal...</p>
+            </div>
+            <div class="notification-card">
+                <h3>Reporte #002 - Máquina Beta</h3>
+                <p><strong>Fecha:</strong> 2025-06-24 14:15</p>
+                <p><strong>Causa:</strong> Sobrecalentamiento</p>
+                <p><strong>Nivel:</strong> Alta</p>
+                <p><strong>Descripción:</strong> Motor principal sobrecalentado...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
