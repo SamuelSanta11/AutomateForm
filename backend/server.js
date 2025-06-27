@@ -1,37 +1,39 @@
 const express = require('express');
-const app = express();
 const path = require('path');
-require('dotenv').config();
+const pool = require('./config/database.js');
+require('dotenv').config(); // Cargar variables de entorno
+const routes = require('./routes/apiRoutes.js'); // Importar rutas
 
-const port = process.env.PORT || 3000;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Archivos estaticos desde el front end index.html
+app.use(express.static(path.join(__dirname, '..')));
 
 
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/api', routes); 
 
 
-const authRoutes = require('./routes/authRoutes');
-const incidentRoutes = require('./routes/incidentRoutes');
-const machinesRoutes = require('./routes/machinesRoutes');
-const notificationRoutes = require('./routes/notificationRoutes');
-
-app.use('/api/auth', authRoutes);
-app.use('/api/incidents', incidentRoutes);
-app.use('/api/machines', machinesRoutes);
-app.use('/api/notifications', notificationRoutes);
-
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
+app.get('/', (req, res) => {
+  res.send('Servidor ejecutándose correctamente');
 });
 
+// Conexion a la base de datos
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Error conectando a la base de datos:', err.stack);
+    return;
+  }
+  console.log('Conexión exitosa a la base de datos');
+  release();
+});
 
-
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+// Iniciar el servidor Ctrl J, node server.js
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
 module.exports = app;
