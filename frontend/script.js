@@ -124,3 +124,72 @@ document.addEventListener('DOMContentLoaded', function() {
         logoutButton.addEventListener('click', logout);
     }
 });
+
+// public/script.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Maneja el envío del formulario de login
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita el envío del formulario por defecto
+            const username = document.getElementById('username')?.value; // Obtiene el valor del campo username
+            const password = document.getElementById('password')?.value; // Obtiene el valor del campo password
+
+            if (username && password) { // Verifica que ambos campos estén llenos
+                // Envía solicitud al backend
+                fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message); // Muestra el mensaje de la API
+                    if (data.message === 'Login exitoso') {
+                        // Opcional: Redirige o carga contenido
+                        window.location.href = '/dashboard.html'; // Ejemplo de redirección
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en el login:', error);
+                    alert('Error al iniciar sesión. Verifica tus credenciales o intenta de nuevo.');
+                });
+            } else {
+                alert('Por favor, complete todos los campos.');
+            }
+        });
+    }
+
+    // [El resto del código DOMContentLoaded permanece igual si lo usas]
+    const toggleButton = document.querySelector('.toggle-sidebar');
+    if (toggleButton) {
+        toggleButton.addEventListener('click', toggleSidebar);
+    }
+
+    const menuItems = document.querySelectorAll('.sidebar-menu li');
+    if (menuItems.length > 0) {
+        menuItems.forEach(item => {
+            item.addEventListener('click', function(event) {
+                const module = this.getAttribute('data-module');
+                if (module) showModule(module);
+            });
+        });
+    }
+
+    const reportForm = document.querySelector('.reportes-form');
+    if (reportForm) {
+        reportForm.addEventListener('submit', submitReport);
+    }
+
+    const logoutButton = document.querySelector('.logout-btn');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logout);
+    }
+});

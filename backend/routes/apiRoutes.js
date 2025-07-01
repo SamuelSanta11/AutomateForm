@@ -12,7 +12,7 @@ router.post('/login', async (req, res) => {
   console.log('Solicitud enviada al cuerpo:', req.body)
   const { username, password } = req.body;
 
-  //Verifica que el usuario y la contraseña existan
+  //Verificar que el usuario y la contraseña existan
   try {
     if (!username || !password) {
       return res.status(400).json({ error: 'Usuario y contraseña invalida' });

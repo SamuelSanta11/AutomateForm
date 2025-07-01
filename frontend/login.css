@@ -1,5 +1,4 @@
-/* Reset y Estilos Globales */
-* {
+    * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -7,9 +6,9 @@
     color: #ffffff;
 }
 
-/* Estilos del Body */
+
 body {
-    background-color: #0d0d0d; /* Fondo negro como en la imagen */
+    background-color: #0d0d0d; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,7 +18,7 @@ body {
 }
 
 body::after {
-    content: "Activar Windows\nVe a Configuración para activar Windows.";
+    /* content: "Activar Windows\nVe a Configuración para activar Windows."; */
     position: absolute;
     bottom: 10px;
     right: 10px;
@@ -30,7 +29,7 @@ body::after {
     opacity: 0.7;
 }
 
-/* Contenedor del Login */
+
 .login-container {
     display: flex;
     justify-content: center;
@@ -40,7 +39,7 @@ body::after {
     animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Caja del Login */
+
 .login-box {
     background: rgba(22, 27, 34, 0.85);
     padding: 40px;
@@ -53,11 +52,11 @@ body::after {
 
 /* Logo */
 .login-logo {
-    width: 150px; /* Ajustado para que sea más prominente como en la imagen */
+    width: 150px; 
     margin-bottom: 20px;
 }
 
-/* Título */
+
 .login-box h2 {
     margin-bottom: 30px;
     color: #58a6ff;
@@ -65,7 +64,7 @@ body::after {
     font-weight: 600;
 }
 
-/* Grupo de Entrada */
+
 .input-group {
     margin-bottom: 20px;
 }
@@ -86,7 +85,7 @@ body::after {
     border: 1px solid #58a6ff;
 }
 
-/* Botón */
+
 .login-box button {
     width: 100%;
     padding: 14px;
@@ -104,7 +103,7 @@ body::after {
     background-color: #4793ff;
 }
 
-/* Animaciones */
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -115,7 +114,7 @@ body::after {
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* Media Queries */
+
 @media (max-width: 480px) {
     .login-box {
         padding: 20px;
@@ -127,4 +126,38 @@ body::after {
     .login-box h2 {
         font-size: 20px;
     }
+}
+
+.input-group select {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #21262d;
+    font-size: 16px;
+    color: #c9d1d9;
+    appearance: none;
+    cursor: pointer;
+}
+
+.input-group select:focus {
+    outline: none;
+    border: 1px solid #58a6ff;
+}
+
+.input-group label {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    font-size: 14px;
+    color: #a0a0a0;
+    pointer-events: none;
+    transition: 0.3s;
+}
+
+.input-group select:focus + label,
+.input-group select:valid + label {
+    top: -10px;
+    font-size: 12px;
+    color: #58a6ff;
 }
