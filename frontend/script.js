@@ -1,4 +1,3 @@
-// Funciones principales
 function hideLogin() {
     const loginContainer = document.getElementById('loginContainer');
     if (loginContainer) {
@@ -22,13 +21,8 @@ function toggleSidebar() {
         mainContent.classList.toggle('expanded');
         toggleButton.classList.toggle('active');
 
-        if (toggleButton.classList.contains('active')) {
-            toggleIcon.classList.remove('fa-bars');
-            toggleIcon.classList.add('fa-times');
-        } else {
-            toggleIcon.classList.remove('fa-times');
-            toggleIcon.classList.add('fa-bars');
-        }
+        toggleIcon.classList.toggle('fa-bars');
+        toggleIcon.classList.toggle('fa-times');
     }
 }
 
@@ -40,11 +34,9 @@ function showModule(module) {
     if (notificacionesModule) notificacionesModule.style.display = module === 'notificaciones' ? 'block' : 'none';
 
     const menuItems = document.querySelectorAll('.sidebar-menu li');
-    if (menuItems) {
-        menuItems.forEach(li => li.classList.remove('active'));
-        const currentItem = document.querySelector(`.sidebar-menu li[data-module="${module}"]`);
-        if (currentItem) currentItem.classList.add('active');
-    }
+    menuItems.forEach(li => li.classList.remove('active'));
+    const currentItem = document.querySelector(`.sidebar-menu li[data-module="${module}"]`);
+    if (currentItem) currentItem.classList.add('active');
 }
 
 function submitReport(event) {
@@ -57,117 +49,80 @@ function submitReport(event) {
         incidentDescription: document.getElementById('incidentDescription')?.value || '',
         evidence: document.getElementById('evidence')?.files[0] || null
     };
-    alert('Reporte enviado (funcionalidad simulada)');
+    Swal.fire('¡Reporte enviado!', 'Este es un ejemplo simulado.', 'success');
     console.log(formData);
-    const form = event.target;
-    if (form) form.reset();
+    event.target.reset();
 }
 
 function logout() {
-    const loginContainer = document.getElementById('loginContainer');
-    if (loginContainer) {
-        alert('Cerrar sesión (funcionalidad simulada)');
-        loginContainer.style.display = 'flex';
-        const mainContent = document.getElementById('mainContent');
-        const sidebar = document.getElementById('sidebar');
-        if (mainContent) mainContent.style.display = 'none';
-        if (sidebar) {
-            sidebar.classList.remove('visible');
-            sidebar.classList.add('hidden');
-        }
-    }
+    Swal.fire({
+        icon: 'success',
+        title: 'Sesión cerrada',
+        text: 'Has cerrado sesión correctamente',
+        timer: 1500,
+        showConfirmButton: false
+    }).then(() => {
+        window.location.href = '/login.html';
+    });
 }
 
-// Inicialización de eventos al cargar el DOM
-document.addEventListener('DOMContentLoaded', function() {
-    // Evento para el formulario de login
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Evento para el formulario login
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
-        loginForm.addEventListener('submit', function(event) {
+        loginForm.addEventListener('submit', function (event) {
             event.preventDefault();
             const username = document.getElementById('username')?.value;
             const password = document.getElementById('password')?.value;
-            if (username && password) {
-                hideLogin();
-            } else {
-                alert('Por favor, complete todos los campos.');
-            }
-        });
-    }
+            const rol = document.getElementById('rol')?.value;
 
-    // Evento para el botón de hamburguesa
-    const toggleButton = document.querySelector('.toggle-sidebar');
-    if (toggleButton) {
-        toggleButton.addEventListener('click', toggleSidebar);
-    }
-
-    // Evento para los ítems del menú lateral
-    const menuItems = document.querySelectorAll('.sidebar-menu li');
-    if (menuItems.length > 0) {
-        menuItems.forEach(item => {
-            item.addEventListener('click', function(event) {
-                const module = this.getAttribute('data-module');
-                if (module) showModule(module);
-            });
-        });
-    }
-
-    // Evento para el formulario de reportes
-    const reportForm = document.querySelector('.reportes-form');
-    if (reportForm) {
-        reportForm.addEventListener('submit', submitReport);
-    }
-
-    // Evento para el botón de logout
-    const logoutButton = document.querySelector('.logout-btn');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', logout);
-    }
-});
-
-// public/script.js
-document.addEventListener('DOMContentLoaded', function() {
-    // Maneja el envío del formulario de login
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Evita el envío del formulario por defecto
-            const username = document.getElementById('username')?.value; // Obtiene el valor del campo username
-            const password = document.getElementById('password')?.value; // Obtiene el valor del campo password
-
-            if (username && password) { // Verifica que ambos campos estén llenos
-                // Envía solicitud al backend
+            if (username && password && rol) {
                 fetch('http://localhost:3000/api/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ username, password }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la respuesta del servidor');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    alert(data.message); // Muestra el mensaje de la API
-                    if (data.message === 'Login exitoso') {
-                        // Opcional: Redirige o carga contenido
-                        window.location.href = '/dashboard.html'; // Ejemplo de redirección
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en el login:', error);
-                    alert('Error al iniciar sesión. Verifica tus credenciales o intenta de nuevo.');
-                });
+                    .then(response => {
+                        if (!response.ok) throw new Error('Credenciales inválidas');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.user && data.user.rol === rol) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Bienvenido!',
+                                text: `Has iniciado sesión como ${data.user.rol}`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = '/index.html';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Rol incorrecto',
+                                text: 'El rol seleccionado no coincide con el usuario',
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de inicio de sesión',
+                            text: err.message
+                        });
+                    });
             } else {
-                alert('Por favor, complete todos los campos.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Por favor, complete todos los campos.'
+                });
             }
         });
     }
 
-    // [El resto del código DOMContentLoaded permanece igual si lo usas]
     const toggleButton = document.querySelector('.toggle-sidebar');
     if (toggleButton) {
         toggleButton.addEventListener('click', toggleSidebar);
@@ -176,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuItems = document.querySelectorAll('.sidebar-menu li');
     if (menuItems.length > 0) {
         menuItems.forEach(item => {
-            item.addEventListener('click', function(event) {
+            item.addEventListener('click', function () {
                 const module = this.getAttribute('data-module');
                 if (module) showModule(module);
             });
