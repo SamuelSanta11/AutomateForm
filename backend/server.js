@@ -4,6 +4,8 @@ const pool = require('./config/database');
 const routes = require('./routes/apiRoutes');
 require('dotenv').config();
 
+
+const apiRoutes = require('./routes/apiRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
