@@ -1,12 +1,9 @@
 function hideLogin() {
     const loginContainer = document.getElementById('loginContainer');
-    if (loginContainer) {
-        loginContainer.style.display = 'none';
-    }
+    if (loginContainer) loginContainer.style.display = 'none';
+
     const mainContent = document.getElementById('mainContent');
-    if (mainContent) {
-        mainContent.style.display = 'block';
-    }
+    if (mainContent) mainContent.style.display = 'block';
 }
 
 function toggleSidebar() {
@@ -62,12 +59,21 @@ function logout() {
         timer: 1500,
         showConfirmButton: false
     }).then(() => {
+        localStorage.removeItem('rol');
         window.location.href = '/login.html';
     });
 }
 
-
 document.addEventListener('DOMContentLoaded', function () {
+
+    const storedRol = localStorage.getItem('rol');
+    if (storedRol === 'operario') {
+        const notificacionesModule = document.getElementById('notificacionesModule');
+        const notificacionesMenu = document.querySelector('li[data-module="notificaciones"]');
+        if (notificacionesModule) notificacionesModule.style.display = 'none';
+        if (notificacionesMenu) notificacionesMenu.style.display = 'none';
+    }
+
     // Evento para el formulario login
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -89,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(data => {
                         if (data.user && data.user.rol === rol) {
+                            localStorage.setItem('rol', data.user.rol); // Guardar rol
                             Swal.fire({
                                 icon: 'success',
                                 title: '¡Bienvenido!',
@@ -148,3 +155,85 @@ document.addEventListener('DOMContentLoaded', function () {
         logoutButton.addEventListener('click', logout);
     }
 });
+
+// ============================
+// FUNCIONALIDAD: MÁQUINAS
+// ============================
+
+const rolActual = localStorage.getItem('rol');
+const selectMaquina = document.getElementById('machineSelect');
+const addMachineBtn = document.getElementById('addMachineBtn');
+const modal = document.getElementById('modalNuevaMaquina');
+const saveMachineBtn = document.getElementById('saveMachineBtn');
+const cancelMachineBtn = document.getElementById('cancelMachineBtn');
+const newMachineName = document.getElementById('newMachineName');
+const newMachineDesc = document.getElementById('newMachineDesc');
+
+// Ocultar botón y modal para operario
+if (rolActual === 'operario') {
+    if (addMachineBtn) addMachineBtn.style.display = 'none';
+    if (modal) modal.style.display = 'none';
+}
+
+// Cargar máquinas existentes en el select
+if (selectMaquina) {
+    fetch('http://localhost:3000/api/maquinas')
+        .then(res => res.json())
+        .then(maquinas => {
+            maquinas.forEach(m => {
+                const option = document.createElement('option');
+                option.value = m.id;
+                option.textContent = m.nombre;
+                selectMaquina.appendChild(option);
+            });
+        })
+        .catch(err => {
+            console.error('Error al cargar máquinas:', err);
+            Swal.fire('Error', 'No se pudieron cargar las máquinas', 'error');
+        });
+}
+
+// Mostrar modal
+// Mostrar modal al dar clic en el botón +
+if (addMachineBtn) {
+    addMachineBtn.addEventListener('click', () => {
+        if (modal) modal.style.display = 'flex'; // activa el modal centrado
+    });
+}
+
+
+// Ocultar modal
+if (cancelMachineBtn) {
+    cancelMachineBtn.addEventListener('click', () => {
+        if (modal) modal.style.display = 'none';
+        newMachineName.value = '';
+        newMachineDesc.value = '';
+    });
+}
+
+// Guardar nueva máquina (simulado)
+if (saveMachineBtn) {
+    saveMachineBtn.addEventListener('click', () => {
+        const nombre = newMachineName.value.trim();
+        const descripcion = newMachineDesc.value.trim();
+
+        if (!nombre) {
+            Swal.fire('Nombre obligatorio', 'Ingresa el nombre de la máquina', 'warning');
+            return;
+        }
+
+        // Aquí se enviará luego al backend
+        Swal.fire('Guardado', 'La máquina fue creada (simulado)', 'success');
+
+        modal.style.display = 'none';
+        newMachineName.value = '';
+        newMachineDesc.value = '';
+
+        // Agregar la nueva máquina al select (simulado)
+        const nuevaOpcion = document.createElement('option');
+        nuevaOpcion.value = '0'; // Temporal, se reemplazará al tener el ID real del backend
+        nuevaOpcion.textContent = nombre;
+        selectMaquina.appendChild(nuevaOpcion);
+    });
+}
+
