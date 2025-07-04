@@ -95,7 +95,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(data => {
                         if (data.user && data.user.rol === rol) {
-                            localStorage.setItem('rol', data.user.rol); // Guardar rol
+                            // ✅ Guardamos el rol y el usuario completo
+                            localStorage.setItem('rol', data.user.rol);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+
                             Swal.fire({
                                 icon: 'success',
                                 title: '¡Bienvenido!',
@@ -130,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
     const toggleButton = document.querySelector('.toggle-sidebar');
     if (toggleButton) {
         toggleButton.addEventListener('click', toggleSidebar);
@@ -156,79 +160,191 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-
-const rolActual = localStorage.getItem('rol');
-const selectMaquina = document.getElementById('machineSelect');
+// Evento para agregar maquina nueva
 const addMachineBtn = document.getElementById('addMachineBtn');
-const modal = document.getElementById('modalNuevaMaquina');
-const saveMachineBtn = document.getElementById('saveMachineBtn');
+const modalNuevaMaquina = document.getElementById('modalNuevaMaquina');
 const cancelMachineBtn = document.getElementById('cancelMachineBtn');
+const saveMachineBtn = document.getElementById('saveMachineBtn');
 const newMachineName = document.getElementById('newMachineName');
 const newMachineDesc = document.getElementById('newMachineDesc');
+const machineSelect = document.getElementById('machineSelect');
 
-
-if (rolActual === 'operario') {
-    if (addMachineBtn) addMachineBtn.style.display = 'none';
-    if (modal) modal.style.display = 'none';
-}
-
-
-if (selectMaquina) {
-    fetch('http://localhost:3000/api/maquinas')
-        .then(res => res.json())
-        .then(maquinas => {
-            maquinas.forEach(m => {
-                const option = document.createElement('option');
-                option.value = m.id;
-                option.textContent = m.nombre;
-                selectMaquina.appendChild(option);
-            });
-        })
-        .catch(err => {
-            console.error('Error al cargar máquinas:', err);
-            Swal.fire('Error', 'No se pudieron cargar las máquinas', 'error');
-        });
-}
-
-
+// Mostrar modal
 if (addMachineBtn) {
     addMachineBtn.addEventListener('click', () => {
-        if (modal) modal.style.display = 'flex';
-    });
-}
-
-
-
-if (cancelMachineBtn) {
-    cancelMachineBtn.addEventListener('click', () => {
-        if (modal) modal.style.display = 'none';
         newMachineName.value = '';
         newMachineDesc.value = '';
+        modalNuevaMaquina.style.display = 'flex';
     });
 }
 
+// Cancelar modal
+if (cancelMachineBtn) {
+    cancelMachineBtn.addEventListener('click', () => {
+        modalNuevaMaquina.style.display = 'none';
+    });
+}
+
+// Evento parar guardar maquina nueva
 if (saveMachineBtn) {
-    saveMachineBtn.addEventListener('click', () => {
+    saveMachineBtn.addEventListener('click', async () => {
         const nombre = newMachineName.value.trim();
         const descripcion = newMachineDesc.value.trim();
 
         if (!nombre) {
-            Swal.fire('Nombre obligatorio', 'Ingresa el nombre de la máquina', 'warning');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Nombre requerido',
+                text: 'Por favor ingrese el nombre de la máquina'
+            });
             return;
         }
 
-        // Aquí se enviará luego al backend
-        Swal.fire('Guardado', 'La máquina fue creada (simulado)', 'success');
+        try {
+            const response = await fetch('http://localhost:3000/api/maquinas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, descripcion })
+            });
 
-        modal.style.display = 'none';
-        newMachineName.value = '';
-        newMachineDesc.value = '';
+            if (!response.ok) throw new Error('Error al crear la máquina');
 
-        // Agregar la nueva máquina al select (simulado)
-        const nuevaOpcion = document.createElement('option');
-        nuevaOpcion.value = '0'; // Temporal, se reemplazará al tener el ID real del backend
-        nuevaOpcion.textContent = nombre;
-        selectMaquina.appendChild(nuevaOpcion);
+            const data = await response.json();
+            const nuevaMaquina = data.maquina;
+
+            const option = document.createElement('option');
+            option.value = nuevaMaquina.id;
+            option.textContent = nuevaMaquina.nombre;
+            machineSelect.appendChild(option);
+            machineSelect.value = nuevaMaquina.id;
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Máquina agregada',
+                text: 'La máquina se ha agregado correctamente'
+            });
+
+            modalNuevaMaquina.style.display = 'none';
+
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo agregar la máquina'
+            });
+        }
     });
 }
+
+async function cargarMaquinasEnSelect() {
+    try {
+        const response = await fetch('http://localhost:3000/api/maquinas');
+        const maquinas = await response.json();
+
+        const machineSelect = document.getElementById('machineSelect');
+        machineSelect.innerHTML = '<option value=""> Seleccione una maquinas </option>';
+
+        maquinas.forEach(maquina => {
+            const option = document.createElement('option');
+            option.value = maquina.id
+            option.textContent = maquina.nombre;
+            machineSelect.appendChild(option);
+        })
+    } catch (error) {
+        console.error({ error: 'Error al cargar las maquinas', error })
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarMaquinasEnSelect();
+});
+
+//Evento para eliminar maquina
+const deleteMachineBtn = document.getElementById('deleteMachineBtn');
+
+if (deleteMachineBtn) {
+    deleteMachineBtn.addEventListener('click', async () => {
+        const selectedId = machineSelect.value;
+        const selectedText = machineSelect.options[machineSelect.selectedIndex]?.textContent;
+
+        if (!selectedId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Selecciona una máquina',
+                text: 'Debes seleccionar una máquina para eliminar'
+            });
+            return;
+        }
+
+        const confirm = await Swal.fire({
+            title: `¿Eliminar "${selectedText}"?`,
+            text: "Estas seguro que quieres eliminar esta maquina",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (confirm.isConfirmed) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/maquinas/${selectedId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Error al eliminar máquina');
+
+
+                machineSelect.querySelector(`option[value="${selectedId}"]`)?.remove();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Máquina eliminada',
+                    text: `"${selectedText}" fue eliminada correctamente`
+                });
+
+                machineSelect.value = '';
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar la máquina'
+                });
+            }
+        }
+    });
+}
+
+//De acuerdo al rol puede eliminar y agregar maquinas
+document.addEventListener('DOMContentLoaded', () => {
+    const rol = localStorage.getItem('rol')?.toLowerCase(); // sigue usando tu lógica original
+
+    const addMachineBtn = document.getElementById('addMachineBtn');
+    const deleteMachineBtn = document.getElementById('deleteMachineBtn');
+
+    if (rol !== 'admin') {
+        if (addMachineBtn) addMachineBtn.style.display = 'none';
+        if (deleteMachineBtn) deleteMachineBtn.style.display = 'none';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const welcomeDiv = document.getElementById('sidebar-welcome');
+    const rol = localStorage.getItem('rol');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (welcomeDiv && user?.username) {
+        welcomeDiv.textContent = `Bienvenid@, ${user.username}`;
+        welcomeDiv.style.marginTop = '20px';
+        welcomeDiv.style.padding = '10px';
+        welcomeDiv.style.color = '#fff';
+        welcomeDiv.style.fontWeight = '500';
+        welcomeDiv.style.textAlign = 'center';
+    }
+});
+
+
 

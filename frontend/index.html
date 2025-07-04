@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistema de reportes Automate</title>
   <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
+
 <body>
 
   <div id="sidebar" class="sidebar hidden">
@@ -17,6 +19,7 @@
       <li data-module="notificaciones"><i class="fas fa-bell"></i> Notificaciones</li>
       <li class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</li>
     </ul>
+    <div id="sidebar-welcome" class="sidebar-welcome"></div>
   </div>
 
   <div id="mainContent" class="main-content">
@@ -33,8 +36,13 @@
             <select id="machineSelect" required style="flex: 1;">
               <option value="">Seleccione una máquina</option>
             </select>
-            <button type="button" id="addMachineBtn" title="Agregar nueva máquina" style="background: none; border: none; cursor: pointer;">
-             <i class="fas fa-plus-circle" style="font-size: 1.5rem; color: #4F9CFF;"></i>
+            <button type="button" id="addMachineBtn" title="Agregar nueva máquina"
+              style="background: none; border: none; cursor: pointer;">
+              <i class="fas fa-plus-circle" style="font-size: 1.5rem; color: #4F9CFF;"></i>
+            </button>
+            <button type="button" id="deleteMachineBtn" title="Eliminar máquina seleccionada"
+              style="background: none; border: none; cursor: pointer;">
+              <i class="fas fa-trash-alt" style="font-size: 1.5rem; color: red;"></i>
             </button>
           </div>
         </div>
@@ -84,24 +92,25 @@
 
 
   <div id="modalNuevaMaquina" class="modal" style="display: none;">
-  <div class="modal-content">
-    <h3>Agregar Maquina</h3>
-    
-    <label for="newMachineName">Nombre</label>
-    <input type="text" id="newMachineName" placeholder="Nombre de la maquina" required />
-    
-    <label for="newMachineDesc">Descripción</label>
-    <textarea id="newMachineDesc" rows="3" placeholder="Descripción de la maquina"></textarea>
-    
-    <div style="text-align: right;">
-      <button id="cancelMachineBtn">Cancelar</button>
-      <button id="saveMachineBtn">Agregar</button>
+    <div class="modal-content">
+      <h3>Agregar Maquina</h3>
+
+      <label for="newMachineName">Nombre</label>
+      <input type="text" id="newMachineName" placeholder="Nombre de la maquina" required />
+
+      <label for="newMachineDesc">Descripción</label>
+      <textarea id="newMachineDesc" rows="3" placeholder="Descripción de la maquina"></textarea>
+
+      <div style="text-align: right;">
+        <button id="cancelMachineBtn">Cancelar</button>
+        <button id="saveMachineBtn">Agregar</button>
+      </div>
     </div>
   </div>
-</div>
 
 
   <script src="script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
+
 </html>
