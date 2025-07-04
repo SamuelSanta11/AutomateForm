@@ -346,5 +346,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+async function cargarNotificaciones(usuario_id) {
+  try {
+    const res = await fetch(`/api/notificaciones/${usuario_id}`);
+    const notificaciones = await res.json();
+
+    const contenedor = document.getElementById('contenedor-notificaciones');
+    contenedor.innerHTML = ''; // limpiar contenido anterior
+
+    if (notificaciones.length === 0) {
+      contenedor.innerHTML = '<p>No hay notificaciones por el momento.</p>';
+      return;
+    }
+
+    notificaciones.forEach(notif => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const titulo = document.createElement('h4');
+      titulo.textContent = '⚠️ Nueva notificación';
+
+      const mensaje = document.createElement('p');
+      mensaje.textContent = notif.mensaje;
+
+      const fecha = document.createElement('span');
+      fecha.className = 'fecha';
+      fecha.textContent = new Date(notif.creada_en).toLocaleString();
+
+      card.appendChild(titulo);
+      card.appendChild(mensaje);
+      card.appendChild(fecha);
+
+      contenedor.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error('Error al cargar notificaciones:', error);
+  }
+}
+
+cargarNotificaciones(1);
+
 
 
