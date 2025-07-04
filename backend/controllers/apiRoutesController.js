@@ -36,7 +36,7 @@ const login = async (req, res) => {
   }
 };
 
-// Obtener todas las máquinas
+// Obtener todas las máquinas (para administrador)
 const getMaquinas = async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM maquinas ORDER BY id ASC');
@@ -82,10 +82,93 @@ const deleteMaquina = async (req, res) => {
   }
 };
 
+// Controlador para enviar un reporte
+const enviarReporte = async (req, res) => {
+  try {
+    const {
+      usuario_id,
+      maquina_id,
+      nombre_maquina,
+      fecha_incidente,
+      hora_incidente,
+      causas,
+      nivel_peligro,
+      descripcion
+    } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO formularios_incidente (
+        usuario_id, maquina_id, nombre_maquina, fecha_incidente,
+        hora_incidente, causas, nivel_peligro, descripcion
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      RETURNING id`,
+      [usuario_id, maquina_id, nombre_maquina, fecha_incidente, hora_incidente, causas, nivel_peligro, descripcion]
+    );
+
+    const formulario_id = result.rows[0].id;
+
+    // Buscar todos los usuarios con rol 'admin' para notificar
+    const adminsResult = await pool.query(`SELECT id FROM usuarios WHERE rol = 'admin'`);
+    const admins = adminsResult.rows;
+
+    const mensaje = `Nuevo reporte de incidente en máquina ${nombre_maquina} - Nivel: ${nivel_peligro}`;
+
+    for (const admin of admins) {
+      await pool.query(
+        `INSERT INTO notificaciones (usuario_id, mensaje, formulario_id)
+         VALUES ($1, $2, $3)`,
+        [admin.id, mensaje, formulario_id]
+      );
+    }
+
+    res.status(201).json({ message: 'Reporte enviado y notificaciones creadas.' });
+
+  } catch (error) {
+    console.error('Error al enviar reporte:', error);
+    res.status(500).json({ error: 'Error al enviar el reporte.' });
+  }
+};
+
+
+const obtenerMaquinas = async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT id, nombre FROM maquinas ORDER BY nombre ASC`);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener máquinas:', error);
+    res.status(500).json({ error: 'Error al obtener máquinas.' });
+  }
+};
+
+// Obtener notificaciones para un usuario
+const getNotificaciones = async (req, res) => {
+  const { usuario_id } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT id, mensaje, creada_en, leida
+       FROM notificaciones
+       WHERE usuario_id = $1
+       ORDER BY creada_en DESC`,
+      [usuario_id]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener notificaciones:', error);
+    res.status(500).json({ error: 'Error al obtener notificaciones.' });
+  }
+};
+
 
 module.exports = {
   login,
   getMaquinas,
   createMaquina,
-  deleteMaquina
+  deleteMaquina,
+  enviarReporte,
+  obtenerMaquinas,
+  getNotificaciones
 };
+
