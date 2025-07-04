@@ -330,7 +330,7 @@ textarea::selection {
 }
 
 #cancelMachineBtn {
-  background-color: #aaa;
+  background-color: #dc3545;
   margin-right: 10px;
   color: #fff;
 }

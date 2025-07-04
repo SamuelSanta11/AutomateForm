@@ -156,9 +156,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// ============================
-// FUNCIONALIDAD: MÁQUINAS
-// ============================
 
 const rolActual = localStorage.getItem('rol');
 const selectMaquina = document.getElementById('machineSelect');
@@ -169,13 +166,13 @@ const cancelMachineBtn = document.getElementById('cancelMachineBtn');
 const newMachineName = document.getElementById('newMachineName');
 const newMachineDesc = document.getElementById('newMachineDesc');
 
-// Ocultar botón y modal para operario
+
 if (rolActual === 'operario') {
     if (addMachineBtn) addMachineBtn.style.display = 'none';
     if (modal) modal.style.display = 'none';
 }
 
-// Cargar máquinas existentes en el select
+
 if (selectMaquina) {
     fetch('http://localhost:3000/api/maquinas')
         .then(res => res.json())
@@ -193,16 +190,15 @@ if (selectMaquina) {
         });
 }
 
-// Mostrar modal
-// Mostrar modal al dar clic en el botón +
+
 if (addMachineBtn) {
     addMachineBtn.addEventListener('click', () => {
-        if (modal) modal.style.display = 'flex'; // activa el modal centrado
+        if (modal) modal.style.display = 'flex';
     });
 }
 
 
-// Ocultar modal
+
 if (cancelMachineBtn) {
     cancelMachineBtn.addEventListener('click', () => {
         if (modal) modal.style.display = 'none';
@@ -211,7 +207,6 @@ if (cancelMachineBtn) {
     });
 }
 
-// Guardar nueva máquina (simulado)
 if (saveMachineBtn) {
     saveMachineBtn.addEventListener('click', () => {
         const nombre = newMachineName.value.trim();
