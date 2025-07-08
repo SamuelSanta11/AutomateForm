@@ -1,4 +1,4 @@
-function hideLogin() {
+function hideLogin() { // Evento para ocultar el login y mostrar contenido principal
     const loginContainer = document.getElementById('loginContainer');
     if (loginContainer) loginContainer.style.display = 'none';
 
@@ -6,6 +6,7 @@ function hideLogin() {
     if (mainContent) mainContent.style.display = 'block';
 }
 
+// Evento para mostrar u ocultar el sidebar
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('mainContent');
@@ -23,6 +24,7 @@ function toggleSidebar() {
     }
 }
 
+// Evento para cambiar entre módulos de reportes y notificaciones
 function showModule(module) {
     const reportesModule = document.getElementById('reportesModule');
     const notificacionesModule = document.getElementById('notificacionesModule');
@@ -34,23 +36,11 @@ function showModule(module) {
     menuItems.forEach(li => li.classList.remove('active'));
     const currentItem = document.querySelector(`.sidebar-menu li[data-module="${module}"]`);
     if (currentItem) currentItem.classList.add('active');
+
+    if (module === 'notificaciones') cargarNotificaciones();
 }
 
-function submitReport(event) {
-    event.preventDefault();
-    const formData = {
-        machineName: document.getElementById('machineName')?.value || '',
-        incidentDateTime: document.getElementById('incidentDateTime')?.value || '',
-        failureCause: document.getElementById('failureCause')?.value || '',
-        dangerLevel: document.getElementById('dangerLevel')?.value || 'baja',
-        incidentDescription: document.getElementById('incidentDescription')?.value || '',
-        evidence: document.getElementById('evidence')?.files[0] || null
-    };
-    Swal.fire('¡Reporte enviado!', 'Este es un ejemplo simulado.', 'success');
-    console.log(formData);
-    event.target.reset();
-}
-
+// Evento para cerrar sesión
 function logout() {
     Swal.fire({
         icon: 'success',
@@ -64,8 +54,10 @@ function logout() {
     });
 }
 
+
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Evento para ocultar módulo de notificaciones si es operario
     const storedRol = localStorage.getItem('rol');
     if (storedRol === 'operario') {
         const notificacionesModule = document.getElementById('notificacionesModule');
@@ -95,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(data => {
                         if (data.user && data.user.rol === rol) {
-                            // ✅ Guardamos el rol y el usuario completo
                             localStorage.setItem('rol', data.user.rol);
                             localStorage.setItem('user', JSON.stringify(data.user));
 
@@ -139,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleButton.addEventListener('click', toggleSidebar);
     }
 
+    // Evento para cambiar de modulos en el menu principal
     const menuItems = document.querySelectorAll('.sidebar-menu li');
     if (menuItems.length > 0) {
         menuItems.forEach(item => {
@@ -149,16 +141,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const reportForm = document.querySelector('.reportes-form');
-    if (reportForm) {
-        reportForm.addEventListener('submit', submitReport);
-    }
-
+    // Evento de cierre de sesión
     const logoutButton = document.querySelector('.logout-btn');
     if (logoutButton) {
         logoutButton.addEventListener('click', logout);
     }
 });
+
 
 // Evento para agregar maquina nueva
 const addMachineBtn = document.getElementById('addMachineBtn');
@@ -318,9 +307,9 @@ if (deleteMachineBtn) {
     });
 }
 
-//De acuerdo al rol puede eliminar y agregar maquinas
+// Evento para verificar acciones de acuerdo al rol
 document.addEventListener('DOMContentLoaded', () => {
-    const rol = localStorage.getItem('rol')?.toLowerCase(); // sigue usando tu lógica original
+    const rol = localStorage.getItem('rol')?.toLowerCase();
 
     const addMachineBtn = document.getElementById('addMachineBtn');
     const deleteMachineBtn = document.getElementById('deleteMachineBtn');
@@ -331,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+//Evento de mensaje de bienvenida
 document.addEventListener('DOMContentLoaded', () => {
     const welcomeDiv = document.getElementById('sidebar-welcome');
     const rol = localStorage.getItem('rol');
@@ -346,36 +336,138 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function cargarNotificaciones(usuario_id) {
+//Evento para enviar el reporte
+document.addEventListener('DOMContentLoaded', () => {
+  const reportForm = document.querySelector('.reportes-form');
+
+  if (reportForm) {
+    reportForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.id) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de usuario',
+          text: 'No se pudo obtener el ID del usuario.'
+        });
+        return;
+      }
+
+      const maquinaSelect = document.getElementById('machineSelect');
+      const fechaHoraInput = document.getElementById('incidentDateTime');
+      const causas = document.getElementById('failureCause').value.trim();
+      const nivelPeligro = document.getElementById('dangerLevel').value;
+      const descripcion = document.getElementById('incidentDescription').value.trim();
+
+      const maquinaId = maquinaSelect.value;
+      const nombreMaquina = maquinaSelect.selectedOptions[0]?.textContent || 'Sin nombre';
+      const fechaHora = fechaHoraInput.value;
+
+      //Validar campos
+      if (!maquinaId || !fechaHora || !causas || !nivelPeligro || !descripcion) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Por favor, completa todos los campos del formulario.'
+        });
+        return;
+      }
+
+      //Validar fecha y hotra
+      if (!fechaHora.includes('T')) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Fecha y hora inválida',
+          text: 'Selecciona una fecha y hora valida'
+        });
+        return;
+      }
+
+      let [fecha, hora] = fechaHora.split('T');
+
+      if (hora.length === 5) hora += ':00';
+
+      const data = {
+        usuario_id: user.id,
+        maquina_id: parseInt(maquinaId),
+        nombre_maquina: nombreMaquina,
+        fecha_incidente: fecha,
+        hora_incidente: hora,
+        causas,
+        nivel_peligro: nivelPeligro,
+        descripcion
+      };
+
+      try {
+        const response = await fetch('http://localhost:3000/api/enviar-reporte', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error('Error al enviar el reporte.');
+
+        const result = await response.json();
+        Swal.fire({
+          icon: 'success',
+          title: 'Reporte enviado',
+          text: result.message || 'Se ha enviado correctamente el reporte.'
+        });
+
+        reportForm.reset();
+
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo enviar el reporte.'
+        });
+      }
+    });
+  }
+});
+
+
+// Evento para cargar notificaciones
+async function cargarNotificaciones() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user || !user.id) return;
+
   try {
-    const res = await fetch(`/api/notificaciones/${usuario_id}`);
-    const notificaciones = await res.json();
+    const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
+    const notificaciones = await response.json();
 
     const contenedor = document.getElementById('contenedor-notificaciones');
-    contenedor.innerHTML = ''; // limpiar contenido anterior
+    contenedor.innerHTML = '';
 
     if (notificaciones.length === 0) {
-      contenedor.innerHTML = '<p>No hay notificaciones por el momento.</p>';
+      contenedor.innerHTML = '<p>No tienes notificaciones.</p>';
       return;
     }
 
-    notificaciones.forEach(notif => {
+    notificaciones.forEach(noti => {
+
+      const fechaFormateada = new Date(noti.creada_en).toLocaleString('es-CO', {
+        timeZone: 'America/Bogota',
+        hour12: true,
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
       const card = document.createElement('div');
-      card.className = 'card';
+      card.classList.add('notification-card');
 
-      const titulo = document.createElement('h4');
-      titulo.textContent = '⚠️ Nueva notificación';
-
-      const mensaje = document.createElement('p');
-      mensaje.textContent = notif.mensaje;
-
-      const fecha = document.createElement('span');
-      fecha.className = 'fecha';
-      fecha.textContent = new Date(notif.creada_en).toLocaleString();
-
-      card.appendChild(titulo);
-      card.appendChild(mensaje);
-      card.appendChild(fecha);
+      card.innerHTML = `
+        <h3>Notificación</h3>
+        <p>${noti.mensaje}</p>
+        <small>${fechaFormateada}</small>
+      `;
 
       contenedor.appendChild(card);
     });
@@ -384,8 +476,3 @@ async function cargarNotificaciones(usuario_id) {
     console.error('Error al cargar notificaciones:', error);
   }
 }
-
-cargarNotificaciones(1);
-
-
-
