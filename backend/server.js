@@ -1,30 +1,39 @@
 const express = require('express');
 const path = require('path');
-const pool = require('./config/database');
-const routes = require('./routes/apiRoutes');
 require('dotenv').config();
 
+const pool = require('./config/database');
+const routes = require('./routes/apiRoutes');
 
-const apiRoutes = require('./routes/apiRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 
 app.use(express.json());
 
 // Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, '../frontend'))); 
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Rutas API
 app.use('/api', routes);
 
-// Prueba de conexión
-pool.connect((err, client, release) => {
+//Prueba de conexion
+pool.connect(async (err, client, release) => {
   if (err) {
     console.error('Error conectando a la base de datos:', err.stack);
     return;
   }
   console.log('Conectado a la base de datos');
-  release();
+
+  try {
+    await client.query("SET TIME ZONE 'America/Bogota'");
+    console.log('Zona horaria establecida a America/Bogota');
+
+  } catch (timezoneErr) {
+    console.error('Error al configurar zona horaria:', timezoneErr);
+  }
+
+  release(); // liberar cliente del pool
 });
 
 // Iniciar servidor

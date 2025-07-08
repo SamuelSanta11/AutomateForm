@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const path = require('path');
 
 // Controlador para el login
 const login = async (req, res) => {
@@ -36,7 +37,7 @@ const login = async (req, res) => {
   }
 };
 
-// Obtener todas las máquinas (para administrador)
+// Obtener todas las máquinas para administrador
 const getMaquinas = async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM maquinas ORDER BY id ASC');
@@ -47,7 +48,7 @@ const getMaquinas = async (req, res) => {
   }
 };
 
-// Crear nueva máquina
+//Evento para crear nueva máquina
 const createMaquina = async (req, res) => {
   const { nombre, descripcion } = req.body;
   try {
@@ -65,7 +66,7 @@ const createMaquina = async (req, res) => {
   }
 };
 
-// Eliminar máquina
+//Evento para eliminar máquina
 const deleteMaquina = async (req, res) => {
   const id = parseInt(req.params.id);
   try {
@@ -82,7 +83,7 @@ const deleteMaquina = async (req, res) => {
   }
 };
 
-// Controlador para enviar un reporte
+// Evento para enviar un reporte
 const enviarReporte = async (req, res) => {
   try {
     const {
@@ -96,19 +97,32 @@ const enviarReporte = async (req, res) => {
       descripcion
     } = req.body;
 
+    if (!usuario_id || !maquina_id || !fecha_incidente || !hora_incidente) {
+      return res.status(400).json({ message: 'Datos incompletos.' });
+    }
+
     const result = await pool.query(
       `INSERT INTO formularios_incidente (
         usuario_id, maquina_id, nombre_maquina, fecha_incidente,
         hora_incidente, causas, nivel_peligro, descripcion
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      RETURNING id`,
-      [usuario_id, maquina_id, nombre_maquina, fecha_incidente, hora_incidente, causas, nivel_peligro, descripcion]
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id`,
+      [usuario_id, maquina_id, nombre_maquina || 'Desconocida', fecha_incidente, hora_incidente, causas, nivel_peligro, descripcion]
     );
 
     const formulario_id = result.rows[0].id;
 
-    // Buscar todos los usuarios con rol 'admin' para notificar
+    // Subida de imagen
+    if (req.file) {
+      const imagenPath = path.join('uploads', req.file.filename);
+      await pool.query(
+        `INSERT INTO evidencias (formulario_id, imagen_path)
+         VALUES ($1, $2)`,
+        [formulario_id, imagenPath]
+      );
+    }
+
+    // Crear notificaciones para los administradores
     const adminsResult = await pool.query(`SELECT id FROM usuarios WHERE rol = 'admin'`);
     const admins = adminsResult.rows;
 
@@ -122,38 +136,22 @@ const enviarReporte = async (req, res) => {
       );
     }
 
-    res.status(201).json({ message: 'Reporte enviado y notificaciones creadas.' });
+    res.status(201).json({ success: true, message: 'Reporte enviado con éxito.' });
 
   } catch (error) {
     console.error('Error al enviar reporte:', error);
-    res.status(500).json({ error: 'Error al enviar el reporte.' });
+    res.status(500).json({ success: false, message: 'Error al enviar el reporte.' });
   }
 };
 
 
-const obtenerMaquinas = async (req, res) => {
-  try {
-    const result = await pool.query(`SELECT id, nombre FROM maquinas ORDER BY nombre ASC`);
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error al obtener máquinas:', error);
-    res.status(500).json({ error: 'Error al obtener máquinas.' });
-  }
-};
 
-// Obtener notificaciones para un usuario
+//Evento para obtener notificaciones
 const getNotificaciones = async (req, res) => {
-  const { usuario_id } = req.params;
-
   try {
     const result = await pool.query(
-      `SELECT id, mensaje, creada_en, leida
-       FROM notificaciones
-       WHERE usuario_id = $1
-       ORDER BY creada_en DESC`,
-      [usuario_id]
+      'SELECT * FROM notificaciones ORDER BY creada_en DESC'
     );
-
     res.json(result.rows);
   } catch (error) {
     console.error('Error al obtener notificaciones:', error);
@@ -162,13 +160,14 @@ const getNotificaciones = async (req, res) => {
 };
 
 
+
+
 module.exports = {
   login,
   getMaquinas,
   createMaquina,
   deleteMaquina,
   enviarReporte,
-  obtenerMaquinas,
   getNotificaciones
 };
 

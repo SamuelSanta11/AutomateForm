@@ -9,15 +9,18 @@ router.get('/test', (req, res) => {
 
 // Ruta login
 router.post('/login', controller.login);
+
 //Rutas maquina
 router.get('/maquinas', controller.getMaquinas); 
 router.post('/maquinas', controller.createMaquina);
 router.delete('/maquinas/:id', controller.deleteMaquina);
-router.get('/maquinas', controller.obtenerMaquinas);
-router.get('/notificaciones/:usuario_id', controller.getNotificaciones);
 
 //Ruta para enviar reporte
-router.post('/enviar-reporte', controller.enviarReporte); 
+router.post('/enviar-reporte', controller.enviarReporte);
+
+//Ruta para obtener notificaciones
+router.get('/notificaciones/:id', controller.getNotificaciones);
+
 
 
 module.exports = router;
