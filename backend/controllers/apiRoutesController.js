@@ -93,7 +93,7 @@ const enviarReporte = async (req, res) => {
       fecha_incidente,
       hora_incidente,
       causas,
-      nivel_peligro,
+      nivel_peligro,  
       descripcion
     } = req.body;
 
