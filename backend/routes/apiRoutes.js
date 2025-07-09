@@ -22,4 +22,7 @@ router.post('/enviar-reporte', upload.single('imagen'), controller.enviarReporte
 //Ruta obtener notificaciones
 router.get('/notificaciones/:id', controller.getNotificaciones); //Obtener
 
+//Ruta informacion de la notificacion
+router.get('/detalle-reporte/:id', controller.getDetalleReporte);//Obtener
+
 module.exports = router;

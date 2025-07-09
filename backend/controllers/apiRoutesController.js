@@ -156,13 +156,45 @@ const enviarReporte = async (req, res) => {
 //Evento para obtener notificaciones
 const getNotificaciones = async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT * FROM notificaciones ORDER BY creada_en DESC'
-    );
+    const result = await pool.query(`
+      SELECT n.id AS id, n.mensaje, n.creada_en
+      FROM notificaciones n
+      ORDER BY n.creada_en DESC
+    `);
     res.json(result.rows);
   } catch (error) {
     console.error('Error al obtener notificaciones:', error);
     res.status(500).json({ error: 'Error al obtener notificaciones.' });
+  }
+};
+
+//Evento para ver informacion del reporte
+const getDetalleReporte = async (req, res) => {
+  const notificacionId = req.params.id;
+
+  try {
+    const query = `
+      SELECT f.id, f.usuario_id, f.maquina_id, m.nombre AS nombre_maquina,
+             f.fecha_incidente, f.hora_incidente, f.causas,
+             f.nivel_peligro, f.descripcion, e.imagen_path
+      FROM notificaciones n
+      JOIN formularios_incidente f ON n.formulario_id = f.id
+      LEFT JOIN evidencias e ON e.formulario_id = f.id
+      JOIN maquinas m ON m.id = f.maquina_id
+      WHERE n.id = $1
+    `;
+
+    const { rows } = await pool.query(query, [notificacionId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No se encontró el informacion del reporte.' });
+    }
+
+    res.json(rows[0]);
+
+  } catch (error) {
+    console.error('Error al obtener detalle del reporte:', error);
+    res.status(500).json({ message: 'Error del servidor al obtener la informacion del reporte.' });
   }
 };
 
@@ -173,6 +205,7 @@ module.exports = {
   createMaquina,
   deleteMaquina,
   enviarReporte,
-  getNotificaciones
+  getNotificaciones,
+  getDetalleReporte
 };
 
