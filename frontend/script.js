@@ -338,95 +338,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
 //Evento para enviar el reporte
 document.addEventListener('DOMContentLoaded', () => {
-  const reportForm = document.querySelector('.reportes-form');
+    const reportForm = document.querySelector('.reportes-form');
 
-  if (reportForm) {
-    reportForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
+    if (reportForm) {
+        reportForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user || !user.id) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error de usuario',
-          text: 'No se pudo obtener el ID del usuario.'
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || !user.id) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de usuario',
+                    text: 'No se pudo obtener el ID del usuario.'
+                });
+                return;
+            }
+
+            const maquinaSelect = document.getElementById('machineSelect');
+            const fechaHoraInput = document.getElementById('incidentDateTime');
+            const causas = document.getElementById('failureCause').value.trim();
+            const nivelPeligro = document.getElementById('dangerLevel').value;
+            const descripcion = document.getElementById('incidentDescription').value.trim();
+            const imagenFile = document.getElementById('imagen').files[0];
+
+            const maquinaId = maquinaSelect.value;
+            const nombreMaquina = maquinaSelect.selectedOptions[0]?.textContent || 'Sin nombre';
+            const fechaHora = fechaHoraInput.value;
+
+            // Validar campos
+            if (!maquinaId || !fechaHora || !causas || !nivelPeligro || !descripcion || !imagenFile) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Por favor, completa todos los campos y adjunta la evidencia.'
+                });
+                return;
+            }
+
+            // Validar fecha y hora
+            if (!fechaHora.includes('T')) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha y hora inválida',
+                    text: 'Selecciona una fecha y hora válida.'
+                });
+                return;
+            }
+
+            let [fecha, hora] = fechaHora.split('T');
+            if (hora.length === 5) hora += ':00';
+
+            const formData = new FormData();
+            formData.append('usuario_id', user.id);
+            formData.append('maquina_id', parseInt(maquinaId));
+            formData.append('nombre_maquina', nombreMaquina);
+            formData.append('fecha_incidente', fecha);
+            formData.append('hora_incidente', hora);
+            formData.append('causas', causas);
+            formData.append('nivel_peligro', nivelPeligro);
+            formData.append('descripcion', descripcion);
+            formData.append('imagen', imagenFile); // Aquí se adjunta la imagen
+
+            try {
+                const response = await fetch('http://localhost:3000/api/enviar-reporte', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Error al enviar el reporte.');
+
+                const result = await response.json();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Reporte enviado',
+                    text: result.message || 'Se ha enviado correctamente el reporte.'
+                });
+
+                reportForm.reset();
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo enviar el reporte.'
+                });
+            }
         });
-        return;
-      }
-
-      const maquinaSelect = document.getElementById('machineSelect');
-      const fechaHoraInput = document.getElementById('incidentDateTime');
-      const causas = document.getElementById('failureCause').value.trim();
-      const nivelPeligro = document.getElementById('dangerLevel').value;
-      const descripcion = document.getElementById('incidentDescription').value.trim();
-
-      const maquinaId = maquinaSelect.value;
-      const nombreMaquina = maquinaSelect.selectedOptions[0]?.textContent || 'Sin nombre';
-      const fechaHora = fechaHoraInput.value;
-
-      //Validar campos
-      if (!maquinaId || !fechaHora || !causas || !nivelPeligro || !descripcion) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Campos incompletos',
-          text: 'Por favor, completa todos los campos del formulario.'
-        });
-        return;
-      }
-
-      //Validar fecha y hotra
-      if (!fechaHora.includes('T')) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Fecha y hora inválida',
-          text: 'Selecciona una fecha y hora valida'
-        });
-        return;
-      }
-
-      let [fecha, hora] = fechaHora.split('T');
-
-      if (hora.length === 5) hora += ':00';
-
-      const data = {
-        usuario_id: user.id,
-        maquina_id: parseInt(maquinaId),
-        nombre_maquina: nombreMaquina,
-        fecha_incidente: fecha,
-        hora_incidente: hora,
-        causas,
-        nivel_peligro: nivelPeligro,
-        descripcion
-      };
-
-      try {
-        const response = await fetch('http://localhost:3000/api/enviar-reporte', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        if (!response.ok) throw new Error('Error al enviar el reporte.');
-
-        const result = await response.json();
-        Swal.fire({
-          icon: 'success',
-          title: 'Reporte enviado',
-          text: result.message || 'Se ha enviado correctamente el reporte.'
-        });
-
-        reportForm.reset();
-
-      } catch (error) {
-        console.error(error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo enviar el reporte.'
-        });
-      }
-    });
-  }
+    }
 });
 
 
@@ -448,7 +447,6 @@ async function cargarNotificaciones() {
     }
 
     notificaciones.forEach(noti => {
-
       const fechaFormateada = new Date(noti.creada_en).toLocaleString('es-CO', {
         timeZone: 'America/Bogota',
         hour12: true,
@@ -462,12 +460,19 @@ async function cargarNotificaciones() {
 
       const card = document.createElement('div');
       card.classList.add('notification-card');
-
       card.innerHTML = `
         <h3>Notificación</h3>
         <p>${noti.mensaje}</p>
         <small>${fechaFormateada}</small>
       `;
+
+      card.addEventListener('click', () => {
+        if (!noti.id || isNaN(noti.id)) {
+          console.error("ID inválido en notificación:", noti);
+          return;
+        }
+        mostrarDetalleNotificacion(noti.id);
+      });
 
       contenedor.appendChild(card);
     });
@@ -476,3 +481,38 @@ async function cargarNotificaciones() {
     console.error('Error al cargar notificaciones:', error);
   }
 }
+
+// Mostrar modal con detalle del reporte
+async function mostrarDetalleNotificacion(idNotificacion) {
+  try {
+    const response = await fetch(`http://localhost:3000/api/detalle-reporte/${idNotificacion}`);
+    if (!response.ok) throw new Error('No se pudo obtener el detalle del reporte');
+
+    const data = await response.json();
+
+    document.getElementById('detalle-maquina').textContent = data.nombre_maquina || '';
+    document.getElementById('detalle-fecha').textContent = data.fecha_incidente?.split('T')[0] || '';
+    document.getElementById('detalle-hora').textContent = data.hora_incidente || '';
+    document.getElementById('detalle-peligro').textContent = data.nivel_peligro || '';
+    document.getElementById('detalle-causa').textContent = data.causas || '';
+    document.getElementById('detalle-descripcion').textContent = data.descripcion || '';
+
+    const imagen = document.getElementById('detalle-imagen');
+    if (data.imagen_path) {
+      imagen.src = `http://localhost:3000/${data.imagen_path}`;
+      imagen.style.display = 'block';
+    } else {
+      imagen.style.display = 'none';
+    }
+
+    document.getElementById('modalDetalleNotificacion').style.display = 'flex';
+
+  } catch (error) {
+    console.error('Error al mostrar detalle:', error);
+  }
+}
+
+// Cerrar modal
+document.getElementById("cerrarModalDetalle").addEventListener("click", () => {
+  document.getElementById("modalDetalleNotificacion").style.display = "none";
+});
