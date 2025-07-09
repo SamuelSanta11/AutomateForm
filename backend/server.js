@@ -8,13 +8,20 @@ const routes = require('./routes/apiRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 app.use(express.json());
 
-// Servir archivos estáticos del frontend
+//Capturar frontend HTML CSS JS
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Rutas API
+//Capturar imágenes o archivos subidos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+//Ruta principal para servir index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
+});
+
+//Rutas API
 app.use('/api', routes);
 
 //Prueba de conexion
@@ -28,15 +35,14 @@ pool.connect(async (err, client, release) => {
   try {
     await client.query("SET TIME ZONE 'America/Bogota'");
     console.log('Zona horaria establecida a America/Bogota');
-
   } catch (timezoneErr) {
     console.error('Error al configurar zona horaria:', timezoneErr);
   }
 
-  release(); // liberar cliente del pool
+  release();
 });
 
-// Iniciar servidor
+//Iniciar servidor Ctrl J node server.js
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

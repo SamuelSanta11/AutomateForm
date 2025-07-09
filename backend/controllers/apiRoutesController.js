@@ -97,6 +97,7 @@ const enviarReporte = async (req, res) => {
       descripcion
     } = req.body;
 
+    //Validar todos los campos
     if (!usuario_id || !maquina_id || !fecha_incidente || !hora_incidente) {
       return res.status(400).json({ message: 'Datos incompletos.' });
     }
@@ -107,12 +108,21 @@ const enviarReporte = async (req, res) => {
         hora_incidente, causas, nivel_peligro, descripcion
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id`,
-      [usuario_id, maquina_id, nombre_maquina || 'Desconocida', fecha_incidente, hora_incidente, causas, nivel_peligro, descripcion]
+      [
+        usuario_id,
+        maquina_id,
+        nombre_maquina || 'Desconocida',
+        fecha_incidente,
+        hora_incidente,
+        causas,
+        nivel_peligro,
+        descripcion
+      ]
     );
 
     const formulario_id = result.rows[0].id;
 
-    // Subida de imagen
+    //Guardar imagene en tabla evidencias
     if (req.file) {
       const imagenPath = path.join('uploads', req.file.filename);
       await pool.query(
@@ -122,10 +132,9 @@ const enviarReporte = async (req, res) => {
       );
     }
 
-    // Crear notificaciones para los administradores
+    //Obtener notificaciones para cada admin
     const adminsResult = await pool.query(`SELECT id FROM usuarios WHERE rol = 'admin'`);
     const admins = adminsResult.rows;
-
     const mensaje = `Nuevo reporte de incidente en máquina ${nombre_maquina} - Nivel: ${nivel_peligro}`;
 
     for (const admin of admins) {
@@ -144,8 +153,6 @@ const enviarReporte = async (req, res) => {
   }
 };
 
-
-
 //Evento para obtener notificaciones
 const getNotificaciones = async (req, res) => {
   try {
@@ -158,8 +165,6 @@ const getNotificaciones = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener notificaciones.' });
   }
 };
-
-
 
 
 module.exports = {

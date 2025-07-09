@@ -1,26 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/apiRoutesController');
+const upload = require('../middlewares/upload');
 
-// Ruta de prueba
+//Ruta prueba
 router.get('/test', (req, res) => {
   res.json({ message: 'Ruta de prueba exitosa' });
 });
 
-// Ruta login
-router.post('/login', controller.login);
+//Ruta login
+router.post('/login', controller.login); //Login
 
-//Rutas maquina
-router.get('/maquinas', controller.getMaquinas); 
-router.post('/maquinas', controller.createMaquina);
-router.delete('/maquinas/:id', controller.deleteMaquina);
+//Rutas maquinas
+router.get('/maquinas', controller.getMaquinas); //Obtener
+router.post('/maquinas', controller.createMaquina); //Crear
+router.delete('/maquinas/:id', controller.deleteMaquina); //Eliminar
 
-//Ruta para enviar reporte
-router.post('/enviar-reporte', controller.enviarReporte);
+//Ruta enviar reporte
+router.post('/enviar-reporte', upload.single('imagen'), controller.enviarReporte); //Enviar
 
-//Ruta para obtener notificaciones
-router.get('/notificaciones/:id', controller.getNotificaciones);
-
-
+//Ruta obtener notificaciones
+router.get('/notificaciones/:id', controller.getNotificaciones); //Obtener
 
 module.exports = router;
