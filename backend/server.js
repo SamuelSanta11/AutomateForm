@@ -8,23 +8,25 @@ const routes = require('./routes/apiRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
 
-//Capturar frontend HTML CSS JS
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Capturar frontend HTML CSS JS
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-//Capturar imágenes o archivos subidos
+// Capturar imágenes o archivos subidos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-//Ruta principal para servir index.html
+// Ruta principal para servir index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
 });
 
-//Rutas API
+// Rutas API
 app.use('/api', routes);
 
-//Prueba de conexion
+// Prueba de conexión
 pool.connect(async (err, client, release) => {
   if (err) {
     console.error('Error conectando a la base de datos:', err.stack);
@@ -42,7 +44,8 @@ pool.connect(async (err, client, release) => {
   release();
 });
 
-//Iniciar servidor Ctrl J node server.js
+// Iniciar servidor Ctrl + J node server.js
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+

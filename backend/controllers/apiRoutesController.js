@@ -146,7 +146,7 @@ const enviarReporte = async (req, res) => {
     }
 
     res.status(201).json({ success: true, message: 'Reporte enviado con éxito.' });
-
+z
   } catch (error) {
     console.error('Error al enviar reporte:', error);
     res.status(500).json({ success: false, message: 'Error al enviar el reporte.' });
