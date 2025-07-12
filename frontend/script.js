@@ -247,6 +247,7 @@ async function cargarMaquinasEnSelect() {
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarMaquinasEnSelect();
+    initDragAndDrop();
 });
 
 //Evento para eliminar maquina
@@ -484,35 +485,199 @@ async function cargarNotificaciones() {
 
 // Mostrar modal con detalle del reporte
 async function mostrarDetalleNotificacion(idNotificacion) {
-  try {
-    const response = await fetch(`http://localhost:3000/api/detalle-reporte/${idNotificacion}`);
-    if (!response.ok) throw new Error('No se pudo obtener el detalle del reporte');
+    try {
+        const response = await fetch(`http://localhost:3000/api/detalle-reporte/${idNotificacion}`);
+        if (!response.ok) throw new Error('No se pudo obtener el detalle del reporte');
 
-    const data = await response.json();
+        const data = await response.json();
 
-    document.getElementById('detalle-maquina').textContent = data.nombre_maquina || '';
-    document.getElementById('detalle-fecha').textContent = data.fecha_incidente?.split('T')[0] || '';
-    document.getElementById('detalle-hora').textContent = data.hora_incidente || '';
-    document.getElementById('detalle-peligro').textContent = data.nivel_peligro || '';
-    document.getElementById('detalle-causa').textContent = data.causas || '';
-    document.getElementById('detalle-descripcion').textContent = data.descripcion || '';
+        document.getElementById('detalle-maquina').textContent = data.nombre_maquina || '';
+        document.getElementById('detalle-fecha').textContent = data.fecha_incidente?.split('T')[0] || '';
+        document.getElementById('detalle-hora').textContent = data.hora_incidente ? data.hora_incidente.substring(0, 5) : ''; // Format time
+        document.getElementById('detalle-peligro').textContent = data.nivel_peligro || '';
+        document.getElementById('detalle-causa').textContent = data.causas || '';
+        document.getElementById('detalle-descripcion').textContent = data.descripcion || '';
 
-    const imagen = document.getElementById('detalle-imagen');
-    if (data.imagen_path) {
-      imagen.src = `http://localhost:3000/${data.imagen_path}`;
-      imagen.style.display = 'block';
-    } else {
-      imagen.style.display = 'none';
+        const imagen = document.getElementById('detalle-imagen');
+        const detailImageArea = document.querySelector('.detail-image-area');
+        const dragIcon = detailImageArea.querySelector('i');
+        const dragText = detailImageArea.querySelector('span');
+
+        if (data.imagen_path) {
+            imagen.src = `http://localhost:3000/${data.imagen_path}`;
+            imagen.style.display = 'block';
+            detailImageArea.classList.add('has-file'); // Simula que tiene un archivo
+            dragIcon.classList.remove('fa-cloud-upload-alt'); // Puedes cambiar el icono si lo deseas
+            dragIcon.classList.add('fa-check-circle');
+            dragIcon.style.color = 'var(--accent-green)';
+            dragText.textContent = 'Evidencia fotográfica cargada';
+        } else {
+            imagen.style.display = 'none';
+            imagen.src = ''; // Clear previous image
+            detailImageArea.classList.remove('has-file');
+            dragIcon.classList.remove('fa-check-circle');
+            dragIcon.classList.add('fa-camera'); // Volver al icono de cámara
+            dragIcon.style.color = 'var(--primary-blue)';
+            dragText.textContent = 'Evidencia fotográfica';
+        }
+
+        document.getElementById('modalDetalleNotificacion').style.display = 'flex';
+
+    } catch (error) {
+        console.error('Error al mostrar detalle:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo cargar el detalle del reporte.'
+        });
     }
-
-    document.getElementById('modalDetalleNotificacion').style.display = 'flex';
-
-  } catch (error) {
-    console.error('Error al mostrar detalle:', error);
-  }
 }
 
 // Cerrar modal
 document.getElementById("cerrarModalDetalle").addEventListener("click", () => {
   document.getElementById("modalDetalleNotificacion").style.display = "none";
 });
+
+//Evento para arrastrar y soltar archivos
+function initDragAndDrop() {
+    const dragDropArea = document.querySelector('.drag-drop-area');
+    const fileInput = document.getElementById('imagen');
+    const dragTextSpan = document.querySelector('.drag-text span');
+    const dragIcon = document.querySelector('.drag-text i');
+    const browseButton = document.querySelector('.browse-button');
+
+    if (!dragDropArea || !fileInput || !dragTextSpan || !dragIcon || !browseButton) {
+        console.warn("Drag and drop elements not found. Skipping initialization.");
+        return;
+    }
+
+    // Prevenir comportamientos predeterminados de arrastre
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dragDropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Efectos visuales al arrastrar
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dragDropArea.addEventListener(eventName, () => dragDropArea.classList.add('highlight'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dragDropArea.addEventListener(eventName, () => dragDropArea.classList.remove('highlight'), false);
+    });
+
+    // Evento al soltar archivo
+    dragDropArea.addEventListener('drop', handleDrop, false);
+
+    // Click en el botón de "seleccionar archivo"
+    browseButton.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Evento cuando se selecciona un archivo desde el input
+    fileInput.addEventListener('change', (event) => {
+        if (event.target.files.length > 0) {
+            updateDragDropArea(event.target.files[0]);
+        }
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            fileInput.files = files; // Asignar archivos soltados
+            updateDragDropArea(files[0]);
+        }
+    }
+
+    function updateDragDropArea(file) {
+        if (file) {
+            dragTextSpan.innerHTML = `<strong>Archivo seleccionado:</strong> ${file.name}`;
+            dragIcon.classList.remove('fa-cloud-upload-alt');
+            dragIcon.classList.add('fa-check-circle'); 
+            dragIcon.style.color = 'var(--accent-green)'; 
+            dragDropArea.classList.add('has-file'); 
+        } else {
+            dragTextSpan.innerHTML = 'Arrastra y suelta la imagen aquí o <span class="browse-button">selecciona un archivo</span>';
+            dragIcon.classList.remove('fa-check-circle');
+            dragIcon.classList.add('fa-cloud-upload-alt');
+            dragIcon.style.color = ''; 
+            dragDropArea.classList.remove('has-file');
+        }
+    }
+}
+
+
+// Evento para aplicar filtros en notificaciones
+document.getElementById('aplicarFiltros').addEventListener('click', async () => {
+    const nivel = document.getElementById('filtroNivel').value;
+    const fecha = document.getElementById('filtroFecha').value;
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.id) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
+        const notificaciones = await response.json();
+
+        const filtradas = notificaciones.filter(noti => {
+            const notiFecha = new Date(noti.creada_en).toISOString().split('T')[0];
+            const coincideNivel = !nivel || noti.mensaje.toLowerCase().includes(`nivel: ${nivel}`);
+            const coincideFecha = !fecha || notiFecha === fecha;
+            return coincideNivel && coincideFecha;
+        });
+
+        const contenedor = document.getElementById('contenedor-notificaciones');
+        contenedor.innerHTML = '';
+
+        if (filtradas.length === 0) {
+            contenedor.innerHTML = '<p>No se encontraron notificaciones de este tipo</p>';
+            return;
+        }
+
+        filtradas.forEach(noti => {
+            const fechaFormateada = new Date(noti.creada_en).toLocaleString('es-CO', {
+                timeZone: 'America/Bogota',
+                hour12: true,
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const card = document.createElement('div');
+            card.classList.add('notification-card');
+            card.innerHTML = `
+                <h3>Notificación</h3>
+                <p>${noti.mensaje}</p>
+                <small>${fechaFormateada}</small>
+            `;
+
+            card.addEventListener('click', () => {
+                if (!noti.id || isNaN(noti.id)) return;
+                mostrarDetalleNotificacion(noti.id);
+            });
+
+            contenedor.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error('Error al aplicar filtros:', error);
+    }
+});
+
+// Evento para limpiar filtros
+document.getElementById('limpiarFiltros').addEventListener('click', () => {
+    document.getElementById('filtroNivel').value = '';
+    document.getElementById('filtroFecha').value = '';
+    cargarNotificaciones();
+});
+
+

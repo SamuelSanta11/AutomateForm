@@ -2,32 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Iniciar Sesión</title>
-    <link rel="stylesheet" href="login.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <div id="loginContainer" class="login-container">
+    <div class="login-container">
         <div class="login-box">
             <img src="img/LogoAuto.jpg" alt="Automate Logo" class="login-logo">
             <h2>Iniciar Sesión</h2>
             <form id="loginForm">
                 <div class="input-group">
+                    <i class="fas fa-user icon"></i>
                     <input type="text" id="username" placeholder="Usuario" required>
                 </div>
                 <div class="input-group">
+                    <i class="fas fa-lock icon"></i>
                     <input type="password" id="password" placeholder="Contraseña" required>
                 </div>
                 <div class="input-group">
+                    <i class="fas fa-user-tag icon"></i>
                     <select id="rol" name="rol" required>
                         <option value="" disabled selected>Selecciona tu rol</option>
                         <option value="admin">Administrador</option>
                         <option value="operario">Operario</option>
                     </select>
                 </div>
-                <button type="submit" class="login-btn">Iniciar Sesión</button>
+                <button type="submit" class="login-btn">Ingresar</button>
             </form>
         </div>
     </div>
@@ -35,4 +38,3 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
-

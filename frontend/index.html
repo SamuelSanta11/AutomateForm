@@ -2,129 +2,173 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de reportes Automate</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Reportes Automate</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="shortcut icon" href="img/LogoAuto.jpg" type="image/x-icon">
 </head>
 
 <body>
 
-  <div id="sidebar" class="sidebar hidden">
-    <div class="logo">Automate</div>
-    <ul class="sidebar-menu">
-      <li data-module="reportes"><i class="fas fa-file-alt"></i> Reportes</li>
-      <li data-module="notificaciones"><i class="fas fa-bell"></i> Notificaciones</li>
-      <li class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</li>
-    </ul>
-    <div id="sidebar-welcome" class="sidebar-welcome"></div>
-  </div>
+    <aside id="sidebar" class="sidebar hidden">
+        <div class="logo">Automate</div>
+        <ul class="sidebar-menu">
+            <li data-module="reportes"><i class="fas fa-file-alt"></i> Reportes</li>
+            <li data-module="notificaciones"><i class="fas fa-bell"></i> Notificaciones</li>
+            <li class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</li>
+        </ul>
+        <div id="sidebar-welcome" class="sidebar-welcome"></div>
+    </aside>
 
-  <div id="mainContent" class="main-content">
-    <button class="toggle-sidebar"><i id="toggleIcon" class="fas fa-bars"></i></button>
+    <main id="mainContent" class="main-content">
+        <button class="toggle-sidebar" aria-label="Toggle sidebar">
+            <i id="toggleIcon" class="fas fa-bars"></i>
+        </button>
 
-    <div id="reportesModule" class="reportes">
-      <form class="reportes-form" enctype="multipart/form-data">
-        <h2>Reportes</h2>
+        <section id="reportesModule" class="reportes">
+            <form class="reportes-form" enctype="multipart/form-data">
+                <h2>Crear Nuevo Reporte</h2>
 
-        <div class="form-group">
-          <label for="machineSelect">Nombre de la Máquina</label>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <select id="machineSelect" required style="flex: 1;">
-              <option value="">Seleccione una máquina</option>
-            </select>
-            <button type="button" id="addMachineBtn" title="Agregar nueva máquina"
-              style="background: none; border: none; cursor: pointer;">
-              <i class="fas fa-plus-circle" style="font-size: 1.5rem; color: #4F9CFF;"></i>
-            </button>
-            <button type="button" id="deleteMachineBtn" title="Eliminar máquina seleccionada"
-              style="background: none; border: none; cursor: pointer;">
-              <i class="fas fa-trash-alt" style="font-size: 1.5rem; color: red;"></i>
-            </button>
-          </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="machineSelect">Nombre de la Máquina</label>
+                        <div class="input-with-buttons">
+                            <select id="machineSelect" required>
+                                <option value="">Seleccione una máquina</option>
+                            </select>
+                            <button type="button" id="addMachineBtn" title="Agregar nueva máquina" class="icon-button">
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                            <button type="button" id="deleteMachineBtn" title="Eliminar máquina seleccionada"
+                                class="icon-button delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="incidentDateTime">Fecha y Hora</label>
+                        <input type="datetime-local" id="incidentDateTime" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="failureCause">Causa de la Falla</label>
+                        <input type="text" id="failureCause" required placeholder="Ej: Falla eléctrica, Desgaste de pieza" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dangerLevel">Nivel de Peligro</label>
+                        <select id="dangerLevel">
+                            <option value="baja">Baja</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="critica">Crítica</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="incidentDescription">Descripción</label>
+                    <textarea id="incidentDescription" required placeholder="Describa el incidente en detalle..."></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="imagen">Evidencia (Imagen)</label>
+                    <div class="drag-drop-area">
+                        <input type="file" id="imagen" name="imagen" accept="image/*" capture="camera" required class="hidden-input" />
+                        <div class="drag-text">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Arrastra y suelta la imagen aquí o <span class="browse-button">selecciona un archivo</span></span>
+                        </div>
+                        <div class="uploaded-image-preview" style="display: none;">
+                            <img id="previewImage" src="" alt="Previsualización de imagen" />
+                            <button type="button" id="clearImage" class="clear-image-btn"><i class="fas fa-times-circle"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Enviar Reporte <i class="fas fa-paper-plane"></i></button>
+            </form>
+        </section>
+
+        <section id="notificacionesModule" class="notificaciones" style="display: none;">
+            <div class="notificaciones-header">
+                <h2><i class="fas fa-bell"></i> Notificaciones</h2>
+
+                <div class="filtros-container">
+                    <div class="filtro-grupo">
+                        <label for="filtroNivel"><i class="fas fa-filter"></i> Nivel de Peligro:</label>
+                        <select id="filtroNivel">
+                            <option value="">Todos los niveles</option>
+                            <option value="baja">Baja</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="critica">Crítica</option>
+                        </select>
+                    </div>
+
+                    <div class="filtro-grupo">
+                        <label for="filtroFecha"><i class="fas fa-calendar-alt"></i> Fecha:</label>
+                        <input type="date" id="filtroFecha">
+                    </div>
+
+                    <button id="aplicarFiltros" class="btn-aplicar"><i class="fas fa-search"></i> Aplicar</button>
+                    <button id="limpiarFiltros" class="btn-limpiar">
+                        <i class="fas fa-times-circle"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+
+            <div id="contenedor-notificaciones" class="contenedor-notificaciones">
+                </div>
+        </section>
+
+        <div id="modalNuevaMaquina" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Agregar Nueva Máquina</h3>
+                <label for="newMachineName">Nombre</label>
+                <input type="text" id="newMachineName" placeholder="Nombre de la máquina" required />
+
+                <label for="newMachineDesc">Descripción</label>
+                <textarea id="newMachineDesc" rows="3" placeholder="Descripción de la máquina"></textarea>
+
+                <div class="modal-buttons">
+                    <button id="cancelMachineBtn" class="btn-secondary"><i class="fas fa-ban"></i> Cancelar</button>
+                    <button id="saveMachineBtn" class="btn-primary"><i class="fas fa-save"></i> Agregar</button>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label for="incidentDateTime">Fecha y Hora</label>
-          <input type="datetime-local" id="incidentDateTime" required />
+        <div id="modalDetalleNotificacion" class="modal" style="display: none;">
+            <div class="modal-content detalle-modal-content">
+                <span id="cerrarModalDetalle" class="close-modal-btn">
+                    <i class="fas fa-times-circle"></i>
+                </span>
+                <h2>Detalle del Reporte</h2>
+                <div class="drag-drop-area detail-image-area">
+                    <i class="fas fa-camera"></i>
+                    <span>Evidencia fotográfica</span>
+                    <div class="uploaded-image-container">
+                        <img id="detalle-imagen" src="" alt="Evidencia del reporte" style="display: none;">
+                    </div>
+                </div>
+                <p><strong>Máquina:</strong> <span id="detalle-maquina"></span></p>
+                <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
+                <p><strong>Hora:</strong> <span id="detalle-hora"></span></p>
+                <p><strong>Nivel de peligro:</strong> <span id="detalle-peligro"></span></p>
+                <p><strong>Causa:</strong> <span id="detalle-causa"></span></p>
+                <p><strong>Descripción:</strong> <span id="detalle-descripcion"></span></p>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label for="failureCause">Causa de la Falla</label>
-          <input type="text" id="failureCause" required />
-        </div>
+    </main>
 
-        <div class="form-group">
-          <label for="dangerLevel">Nivel de Peligro</label>
-          <select id="dangerLevel">
-            <option value="baja">Baja</option>
-            <option value="media">Media</option>
-            <option value="alta">Alta</option>
-            <option value="critica">Crítica</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="incidentDescription">Descripción</label>
-          <textarea id="incidentDescription" required></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="imagen">Evidencia</label>
-          <input type="file" id="imagen" name="imagen" accept="image/*" required />
-        </div>
-
-        <button type="submit" class="submit-btn">Enviar Reporte</button>
-      </form>
-    </div>
-
-    <div id="notificacionesModule" class="notificaciones" style="display: none;">
-      <h2>Notificaciones</h2>
-      <div id="contenedor-notificaciones"></div>
-    </div>
-
-    <div id="modalNuevaMaquina" class="modal" style="display: none;">
-      <div class="modal-content">
-        <h3>Agregar Maquina</h3>
-        <label for="newMachineName">Nombre</label>
-        <input type="text" id="newMachineName" placeholder="Nombre de la maquina" required />
-
-        <label for="newMachineDesc">Descripción</label>
-        <textarea id="newMachineDesc" rows="3" placeholder="Descripción de la maquina"></textarea>
-
-        <div style="text-align: right;">
-          <button id="cancelMachineBtn">Cancelar</button>
-          <button id="saveMachineBtn">Agregar</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div id="modalDetalleNotificacion" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span id="cerrarModalDetalle" style="cursor:pointer; float: right;">
-        <i class="fas fa-times" style="color: red;"></i>
-      </span>
-      <h2>Detalle del Reporte</h2>
-      <p><strong>Máquina:</strong> <span id="detalle-maquina"></span></p>
-      <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
-      <p><strong>Hora:</strong> <span id="detalle-hora"></span></p>
-      <p><strong>Nivel de peligro:</strong> <span id="detalle-peligro"></span></p>
-      <p><strong>Causa:</strong> <span id="detalle-causa"></span></p>
-      <p><strong>Descripción:</strong> <span id="detalle-descripcion"></span></p>
-      <div style="text-align: center; margin-top: 15px;">
-        <img id="detalle-imagen" src=""
-          style="max-width: 100%; max-height: 300px; border-radius: 10px; display: none;" />
-      </div>
-    </div>
-  </div>
-
-
-  <script src="script.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
