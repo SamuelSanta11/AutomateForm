@@ -58,7 +58,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="failureCause">Causa de la Falla</label>
-                        <input type="text" id="failureCause" required placeholder="Ej: Falla eléctrica, Desgaste de pieza" />
+                        <input type="text" id="failureCause" required placeholder="Causa de la falla" />
                     </div>
 
                     <div class="form-group">
@@ -74,20 +74,24 @@
 
                 <div class="form-group full-width">
                     <label for="incidentDescription">Descripción</label>
-                    <textarea id="incidentDescription" required placeholder="Describa el incidente en detalle..."></textarea>
+                    <textarea id="incidentDescription" required
+                        placeholder="Describe en detalle el inicdente   "></textarea>
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="imagen">Evidencia (Imagen)</label>
+                    <label for="imagen">Evidencia Fotografica</label>
                     <div class="drag-drop-area">
-                        <input type="file" id="imagen" name="imagen" accept="image/*" capture="camera" required class="hidden-input" />
+                        <input type="file" id="imagen" name="imagen" accept="image/*" capture="camera" required
+                            class="hidden-input" />
                         <div class="drag-text">
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span>Arrastra y suelta la imagen aquí o <span class="browse-button">selecciona un archivo</span></span>
+                            <span>Arrastra y suelta la imagen aquí o <span class="browse-button">selecciona un
+                                        archivo</span></span>
                         </div>
                         <div class="uploaded-image-preview" style="display: none;">
                             <img id="previewImage" src="" alt="Previsualización de imagen" />
-                            <button type="button" id="clearImage" class="clear-image-btn"><i class="fas fa-times-circle"></i></button>
+                            <button type="button" id="clearImage" class="clear-image-btn"><i
+                                        class="fas fa-times-circle"></i></button>
                         </div>
                     </div>
                 </div>
@@ -116,15 +120,20 @@
                         <input type="date" id="filtroFecha">
                     </div>
 
+                    <div class="filtro-grupo">
+                        <label for="filtroMaquina"><i class="fas fa-cogs"></i> Máquina:</label>
+                        <select id="filtroMaquina">
+                            <option value="">Todas las máquinas</option>
+                        </select>
+                    </div>
+
                     <button id="aplicarFiltros" class="btn-aplicar"><i class="fas fa-search"></i> Aplicar</button>
                     <button id="limpiarFiltros" class="btn-limpiar">
                         <i class="fas fa-times-circle"></i> Limpiar
                     </button>
                 </div>
-            </div>
-
-            <div id="contenedor-notificaciones" class="contenedor-notificaciones">
-                </div>
+            </div> 
+            <div id="contenedor-notificaciones" class="contenedor-notificaciones"></div>
         </section>
 
         <div id="modalNuevaMaquina" class="modal" style="display: none;">

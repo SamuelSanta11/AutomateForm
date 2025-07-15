@@ -232,18 +232,32 @@ async function cargarMaquinasEnSelect() {
         const maquinas = await response.json();
 
         const machineSelect = document.getElementById('machineSelect');
-        machineSelect.innerHTML = '<option value=""> Seleccione una maquinas </option>';
+        const filtroMaquinaSelect = document.getElementById('filtroMaquina');
+
+        // Reiniciar ambos selects
+        if (machineSelect) {
+            machineSelect.innerHTML = '<option value="">Seleccione una máquina</option>';
+        }
+        if (filtroMaquinaSelect) {
+            filtroMaquinaSelect.innerHTML = '<option value="">Todas las máquinas</option>';
+        }
 
         maquinas.forEach(maquina => {
-            const option = document.createElement('option');
-            option.value = maquina.id
-            option.textContent = maquina.nombre;
-            machineSelect.appendChild(option);
-        })
+            const option1 = document.createElement('option');
+            option1.value = maquina.id;
+            option1.textContent = maquina.nombre;
+            if (machineSelect) machineSelect.appendChild(option1);
+
+            const option2 = document.createElement('option');
+            option2.value = maquina.nombre; // importante: nombre para filtrar el mensaje
+            option2.textContent = maquina.nombre;
+            if (filtroMaquinaSelect) filtroMaquinaSelect.appendChild(option2);
+        });
     } catch (error) {
-        console.error({ error: 'Error al cargar las maquinas', error })
+        console.error('Error al cargar las máquinas:', error);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarMaquinasEnSelect();
@@ -618,6 +632,7 @@ function initDragAndDrop() {
 document.getElementById('aplicarFiltros').addEventListener('click', async () => {
     const nivel = document.getElementById('filtroNivel').value;
     const fecha = document.getElementById('filtroFecha').value;
+    const maquina = document.getElementById('filtroMaquina').value;
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || !user.id) return;
 
@@ -627,9 +642,12 @@ document.getElementById('aplicarFiltros').addEventListener('click', async () => 
 
         const filtradas = notificaciones.filter(noti => {
             const notiFecha = new Date(noti.creada_en).toISOString().split('T')[0];
+
             const coincideNivel = !nivel || noti.mensaje.toLowerCase().includes(`nivel: ${nivel}`);
             const coincideFecha = !fecha || notiFecha === fecha;
-            return coincideNivel && coincideFecha;
+            const coincideMaquina = !maquina || noti.mensaje.toLowerCase().includes(maquina.toLowerCase());
+
+            return coincideNivel && coincideFecha && coincideMaquina;
         });
 
         const contenedor = document.getElementById('contenedor-notificaciones');
@@ -673,11 +691,12 @@ document.getElementById('aplicarFiltros').addEventListener('click', async () => 
     }
 });
 
+
 // Evento para limpiar filtros
 document.getElementById('limpiarFiltros').addEventListener('click', () => {
     document.getElementById('filtroNivel').value = '';
     document.getElementById('filtroFecha').value = '';
+    document.getElementById('filtroMaquina').value = '';
     cargarNotificaciones();
 });
-
 
