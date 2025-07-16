@@ -174,7 +174,7 @@ if (cancelMachineBtn) {
     });
 }
 
-// Evento parar guardar maquina nueva
+// Evento para guardar nueva máquina
 if (saveMachineBtn) {
     saveMachineBtn.addEventListener('click', async () => {
         const nombre = newMachineName.value.trim();
@@ -201,11 +201,21 @@ if (saveMachineBtn) {
             const data = await response.json();
             const nuevaMaquina = data.maquina;
 
+
             const option = document.createElement('option');
             option.value = nuevaMaquina.id;
             option.textContent = nuevaMaquina.nombre;
             machineSelect.appendChild(option);
             machineSelect.value = nuevaMaquina.id;
+
+
+            const filtroMaquinaSelect = document.getElementById('filtroMaquina');
+            if (filtroMaquinaSelect) {
+                const filtroOption = document.createElement('option');
+                filtroOption.value = nuevaMaquina.nombre;
+                filtroOption.textContent = nuevaMaquina.nombre;
+                filtroMaquinaSelect.appendChild(filtroOption);
+            }
 
             Swal.fire({
                 icon: 'success',
@@ -249,7 +259,7 @@ async function cargarMaquinasEnSelect() {
             if (machineSelect) machineSelect.appendChild(option1);
 
             const option2 = document.createElement('option');
-            option2.value = maquina.nombre; // importante: nombre para filtrar el mensaje
+            option2.value = maquina.nombre;
             option2.textContent = maquina.nombre;
             if (filtroMaquinaSelect) filtroMaquinaSelect.appendChild(option2);
         });
@@ -257,6 +267,7 @@ async function cargarMaquinasEnSelect() {
         console.error('Error al cargar las máquinas:', error);
     }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -374,23 +385,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const causas = document.getElementById('failureCause').value.trim();
             const nivelPeligro = document.getElementById('dangerLevel').value;
             const descripcion = document.getElementById('incidentDescription').value.trim();
-            const imagenFile = document.getElementById('imagen').files[0];
+            const imagenInput = document.getElementById('imagen');
+            const imagenFile = imagenInput.files[0];
+            const nombreReportante = document.getElementById('reporterName').value.trim();
 
             const maquinaId = maquinaSelect.value;
             const nombreMaquina = maquinaSelect.selectedOptions[0]?.textContent || 'Sin nombre';
             const fechaHora = fechaHoraInput.value;
 
-            // Validar campos
-            if (!maquinaId || !fechaHora || !causas || !nivelPeligro || !descripcion || !imagenFile) {
+            if (!maquinaId || !fechaHora || !causas || !nivelPeligro || !descripcion || !nombreReportante) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Campos incompletos',
-                    text: 'Por favor, completa todos los campos y adjunta la evidencia.'
+                    text: 'Por favor, completa todos los campos requeridos.'
                 });
                 return;
             }
 
-            // Validar fecha y hora
             if (!fechaHora.includes('T')) {
                 Swal.fire({
                     icon: 'warning',
@@ -412,7 +423,11 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('causas', causas);
             formData.append('nivel_peligro', nivelPeligro);
             formData.append('descripcion', descripcion);
-            formData.append('imagen', imagenFile); // Aquí se adjunta la imagen
+            formData.append('nombre_reportante', nombreReportante);
+
+            if (imagenFile) {
+                formData.append('imagen', imagenFile);
+            }
 
             try {
                 const response = await fetch('http://localhost:3000/api/enviar-reporte', {
@@ -430,6 +445,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 reportForm.reset();
+                
+                const imagenInput = document.getElementById('imagen');
+                imagenInput.value = '';
+
+                const previewImage = document.getElementById('previewImage');
+                if (previewImage) {
+                    previewImage.src = '';
+                    previewImage.style.display = 'none';
+                }
+
+                const uploadedPreview = document.querySelector('.uploaded-image-preview');
+                if (uploadedPreview) {
+                    uploadedPreview.style.display = 'none';
+                }
+
+                const dragDropArea = document.querySelector('.drag-drop-area');
+                if (dragDropArea) {
+                    dragDropArea.classList.remove('success', 'has-file');
+                    dragDropArea.classList.remove('highlight'); 
+                }
+
+                const dragTextSpan = document.querySelector('.drag-text span');
+                if (dragTextSpan) {
+                    dragTextSpan.innerHTML = `Arrastra y suelta la imagen aquí o 
+                <span class="browse-button">selecciona un archivo</span>`;
+                }
+
+                const dragIcon = document.querySelector('.drag-text i');
+                if (dragIcon) {
+                    dragIcon.classList.remove('fa-check-circle');
+                    dragIcon.classList.add('fa-cloud-upload-alt');
+                    dragIcon.style.color = '';
+                }
+
+
+                
+                imagenInput.value = ''; 
+                document.getElementById('previewImage').src = '';
+                document.getElementById('previewImage').style.display = 'none';
+                document.querySelector('.uploaded-image-preview').style.display = 'none';
+
+                // Opcional: quitar estilos de éxito si los tienes
+                const dragArea = document.querySelector('.drag-drop-area');
+                if (dragArea.classList.contains('success')) {
+                    dragArea.classList.remove('success');
+                }
 
             } catch (error) {
                 console.error(error);
@@ -444,60 +505,105 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
 // Evento para cargar notificaciones
+let contadorNoLeidas = 0;
+
 async function cargarNotificaciones() {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (!user || !user.id) return;
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.id) return;
 
-  try {
-    const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
-    const notificaciones = await response.json();
+    try {
+        const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
+        const notificaciones = await response.json();
 
-    const contenedor = document.getElementById('contenedor-notificaciones');
-    contenedor.innerHTML = '';
+        const contenedor = document.getElementById('contenedor-notificaciones');
+        const contadorSpan = document.getElementById('contador-notificaciones');
 
-    if (notificaciones.length === 0) {
-      contenedor.innerHTML = '<p>No tienes notificaciones.</p>';
-      return;
-    }
+        contenedor.innerHTML = '';
 
-    notificaciones.forEach(noti => {
-      const fechaFormateada = new Date(noti.creada_en).toLocaleString('es-CO', {
-        timeZone: 'America/Bogota',
-        hour12: true,
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-
-      const card = document.createElement('div');
-      card.classList.add('notification-card');
-      card.innerHTML = `
-        <h3>Notificación</h3>
-        <p>${noti.mensaje}</p>
-        <small>${fechaFormateada}</small>
-      `;
-
-      card.addEventListener('click', () => {
-        if (!noti.id || isNaN(noti.id)) {
-          console.error("ID inválido en notificación:", noti);
-          return;
+        if (notificaciones.length === 0) {
+            contenedor.innerHTML = '<p>No tienes notificaciones.</p>';
+            contadorSpan.style.display = 'none';
+            return;
         }
-        mostrarDetalleNotificacion(noti.id);
-      });
 
-      contenedor.appendChild(card);
-    });
 
-  } catch (error) {
-    console.error('Error al cargar notificaciones:', error);
-  }
+        const noLeidas = notificaciones.filter(n => !n.leida);
+        contadorNoLeidas = noLeidas.length;
+
+        if (contadorNoLeidas > 0) {
+            contadorSpan.textContent = contadorNoLeidas;
+            contadorSpan.style.display = 'inline-block';
+        } else {
+            contadorSpan.style.display = 'none';
+        }
+
+
+        notificaciones.forEach(noti => {
+            const fechaFormateada = new Date(noti.creada_en).toLocaleString('es-CO', {
+                timeZone: 'America/Bogota',
+                hour12: true,
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const card = document.createElement('div');
+            card.classList.add('notification-card');
+            if (!noti.leida) {
+                card.classList.add('no-leida');
+            }
+
+            card.innerHTML = `
+                <h3>Notificación</h3>
+                <p>${noti.mensaje}</p>
+                <small>${fechaFormateada}</small>
+            `;
+
+            card.addEventListener('click', async () => {
+                if (!noti.id || isNaN(noti.id)) return;
+
+
+                if (!noti.leida) {
+                    try {
+                        await fetch(`http://localhost:3000/api/marcar-leida/${noti.id}`, {
+                            method: 'PUT'
+                        });
+
+                        contadorNoLeidas--;
+                        if (contadorNoLeidas <= 0) {
+                            contadorSpan.style.display = 'none';
+                        } else {
+                            contadorSpan.textContent = contadorNoLeidas;
+                        }
+
+                        card.classList.remove('no-leida');
+                        noti.leida = true;
+                    } catch (err) {
+                        console.error('Error al marcar como leída:', err);
+                    }
+                }
+
+
+                mostrarDetalleNotificacion(noti.id);
+            });
+
+            contenedor.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error('Error al cargar notificaciones:', error);
+    }
 }
 
-// Mostrar modal con detalle del reporte
+
+
+
 async function mostrarDetalleNotificacion(idNotificacion) {
     try {
         const response = await fetch(`http://localhost:3000/api/detalle-reporte/${idNotificacion}`);
@@ -505,9 +611,10 @@ async function mostrarDetalleNotificacion(idNotificacion) {
 
         const data = await response.json();
 
+        document.getElementById('detalle-reportante').textContent = data.nombre_reportante || 'Desconocido';
         document.getElementById('detalle-maquina').textContent = data.nombre_maquina || '';
         document.getElementById('detalle-fecha').textContent = data.fecha_incidente?.split('T')[0] || '';
-        document.getElementById('detalle-hora').textContent = data.hora_incidente ? data.hora_incidente.substring(0, 5) : ''; // Format time
+        document.getElementById('detalle-hora').textContent = data.hora_incidente ? data.hora_incidente.substring(0, 5) : '';
         document.getElementById('detalle-peligro').textContent = data.nivel_peligro || '';
         document.getElementById('detalle-causa').textContent = data.causas || '';
         document.getElementById('detalle-descripcion').textContent = data.descripcion || '';
@@ -520,17 +627,17 @@ async function mostrarDetalleNotificacion(idNotificacion) {
         if (data.imagen_path) {
             imagen.src = `http://localhost:3000/${data.imagen_path}`;
             imagen.style.display = 'block';
-            detailImageArea.classList.add('has-file'); // Simula que tiene un archivo
-            dragIcon.classList.remove('fa-cloud-upload-alt'); // Puedes cambiar el icono si lo deseas
+            detailImageArea.classList.add('has-file');
+            dragIcon.classList.remove('fa-cloud-upload-alt');
             dragIcon.classList.add('fa-check-circle');
             dragIcon.style.color = 'var(--accent-green)';
             dragText.textContent = 'Evidencia fotográfica cargada';
         } else {
             imagen.style.display = 'none';
-            imagen.src = ''; // Clear previous image
+            imagen.src = '';
             detailImageArea.classList.remove('has-file');
             dragIcon.classList.remove('fa-check-circle');
-            dragIcon.classList.add('fa-camera'); // Volver al icono de cámara
+            dragIcon.classList.add('fa-camera');
             dragIcon.style.color = 'var(--primary-blue)';
             dragText.textContent = 'Evidencia fotográfica';
         }
@@ -549,7 +656,7 @@ async function mostrarDetalleNotificacion(idNotificacion) {
 
 // Cerrar modal
 document.getElementById("cerrarModalDetalle").addEventListener("click", () => {
-  document.getElementById("modalDetalleNotificacion").style.display = "none";
+    document.getElementById("modalDetalleNotificacion").style.display = "none";
 });
 
 //Evento para arrastrar y soltar archivos
@@ -614,14 +721,14 @@ function initDragAndDrop() {
         if (file) {
             dragTextSpan.innerHTML = `<strong>Archivo seleccionado:</strong> ${file.name}`;
             dragIcon.classList.remove('fa-cloud-upload-alt');
-            dragIcon.classList.add('fa-check-circle'); 
-            dragIcon.style.color = 'var(--accent-green)'; 
-            dragDropArea.classList.add('has-file'); 
+            dragIcon.classList.add('fa-check-circle');
+            dragIcon.style.color = 'var(--accent-green)';
+            dragDropArea.classList.add('has-file');
         } else {
             dragTextSpan.innerHTML = 'Arrastra y suelta la imagen aquí o <span class="browse-button">selecciona un archivo</span>';
             dragIcon.classList.remove('fa-check-circle');
             dragIcon.classList.add('fa-cloud-upload-alt');
-            dragIcon.style.color = ''; 
+            dragIcon.style.color = '';
             dragDropArea.classList.remove('has-file');
         }
     }
@@ -672,14 +779,45 @@ document.getElementById('aplicarFiltros').addEventListener('click', async () => 
 
             const card = document.createElement('div');
             card.classList.add('notification-card');
+
+
+            if (!noti.leida) {
+                card.classList.add('no-leida');
+            }
+
             card.innerHTML = `
                 <h3>Notificación</h3>
                 <p>${noti.mensaje}</p>
                 <small>${fechaFormateada}</small>
             `;
 
-            card.addEventListener('click', () => {
+            card.addEventListener('click', async () => {
                 if (!noti.id || isNaN(noti.id)) return;
+
+                if (!noti.leida) {
+                    try {
+                        await fetch(`http://localhost:3000/api/marcar-leida/${noti.id}`, {
+                            method: 'PUT'
+                        });
+
+
+                        const contadorSpan = document.getElementById('contador-notificaciones');
+                        if (contadorSpan && contadorSpan.textContent > 0) {
+                            let nuevo = parseInt(contadorSpan.textContent) - 1;
+                            if (nuevo <= 0) {
+                                contadorSpan.style.display = 'none';
+                            } else {
+                                contadorSpan.textContent = nuevo;
+                            }
+                        }
+
+                        card.classList.remove('no-leida');
+                        noti.leida = true;
+                    } catch (err) {
+                        console.error('Error al marcar como leída:', err);
+                    }
+                }
+
                 mostrarDetalleNotificacion(noti.id);
             });
 
@@ -691,12 +829,96 @@ document.getElementById('aplicarFiltros').addEventListener('click', async () => 
     }
 });
 
-
-// Evento para limpiar filtros
+//Evento para limpiar filtros
 document.getElementById('limpiarFiltros').addEventListener('click', () => {
     document.getElementById('filtroNivel').value = '';
     document.getElementById('filtroFecha').value = '';
     document.getElementById('filtroMaquina').value = '';
     cargarNotificaciones();
 });
+
+document.getElementById('filtrarNoLeidas').addEventListener('click', async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.id) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
+        const notificaciones = await response.json();
+
+        const noLeidas = notificaciones.filter(n => !n.leida);
+
+        const contenedor = document.getElementById('contenedor-notificaciones');
+        contenedor.innerHTML = '';
+
+        if (noLeidas.length === 0) {
+            contenedor.innerHTML = '<p>No tienes notificaciones pendientes.</p>';
+            return;
+        }
+
+        noLeidas.forEach(noti => {
+            const fechaFormateada = new Date(noti.creada_en).toLocaleString('es-CO', {
+                timeZone: 'America/Bogota',
+                hour12: true,
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const card = document.createElement('div');
+            card.classList.add('notification-card', 'no-leida');
+
+            card.innerHTML = `
+                <h3>Notificación</h3>
+                <p>${noti.mensaje}</p>
+                <small>${fechaFormateada}</small>
+            `;
+
+            card.addEventListener('click', async () => {
+                if (!noti.id || isNaN(noti.id)) return;
+
+                try {
+                    await fetch(`http://localhost:3000/api/marcar-leida/${noti.id}`, {
+                        method: 'PUT'
+                    });
+
+                    const contadorSpan = document.getElementById('contador-notificaciones');
+                    if (contadorSpan && contadorSpan.textContent > 0) {
+                        let nuevo = parseInt(contadorSpan.textContent) - 1;
+                        if (nuevo <= 0) {
+                            contadorSpan.style.display = 'none';
+                        } else {
+                            contadorSpan.textContent = nuevo;
+                        }
+                    }
+
+                    card.classList.remove('no-leida');
+                    noti.leida = true;
+                } catch (err) {
+                    console.error('Error al marcar como leída:', err);
+                }
+
+                mostrarDetalleNotificacion(noti.id);
+            });
+
+            contenedor.appendChild(card);
+        });
+
+    } catch (err) {
+        console.error('Error al cargar no leídas:', err);
+    }
+});
+
+// Resetear formulario completo
+document.querySelector('.reportes-form').reset();
+
+// Limpiar previsualización de imagen
+document.getElementById('previewImage').src = '';
+document.querySelector('.uploaded-image-preview').style.display = 'none';
+
+// Restaurar zona de arrastrar y soltar
+document.querySelector('.drag-text').style.display = 'block';
+document.getElementById('imagen').value = ''; // Limpia el input file
 

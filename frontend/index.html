@@ -28,6 +28,7 @@
             <i id="toggleIcon" class="fas fa-bars"></i>
         </button>
 
+        <!-- Módulo de Reportes -->
         <section id="reportesModule" class="reportes">
             <form class="reportes-form" enctype="multipart/form-data">
                 <h2>Crear Nuevo Reporte</h2>
@@ -75,33 +76,56 @@
                 <div class="form-group full-width">
                     <label for="incidentDescription">Descripción</label>
                     <textarea id="incidentDescription" required
-                        placeholder="Describe en detalle el inicdente   "></textarea>
+                        placeholder="Describe en detalle el incidente   "></textarea>
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="imagen">Evidencia Fotografica</label>
+                    <label for="reporterName">Nombre quien reporta</label>
+                    <input type="text" id="reporterName" name="nombre_reportante" placeholder="Nombre del operario"
+                        required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="imagen">Evidencia Fotográfica</label>
                     <div class="drag-drop-area">
-                        <input type="file" id="imagen" name="imagen" accept="image/*" capture="camera" required
+                        <input type="file" id="imagen" name="imagen" accept="image/*" capture="camera"
                             class="hidden-input" />
                         <div class="drag-text">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <span>Arrastra y suelta la imagen aquí o <span class="browse-button">selecciona un
-                                        archivo</span></span>
+                                    archivo</span></span>
                         </div>
                         <div class="uploaded-image-preview" style="display: none;">
                             <img id="previewImage" src="" alt="Previsualización de imagen" />
-                            <button type="button" id="clearImage" class="clear-image-btn"><i
-                                        class="fas fa-times-circle"></i></button>
+                            <button type="button" id="clearImage" class="clear-image-btn">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
+
                 <button type="submit" class="submit-btn">Enviar Reporte <i class="fas fa-paper-plane"></i></button>
             </form>
         </section>
 
         <section id="notificacionesModule" class="notificaciones" style="display: none;">
             <div class="notificaciones-header">
-                <h2><i class="fas fa-bell"></i> Notificaciones</h2>
+                <h2>
+                    <div class="notificaciones-icon" style="position: relative; display: inline-block;">
+                        <i class="fas fa-bell"></i>
+                        <span id="contador-notificaciones" class="badge" style="
+              display: none;
+              background-color: red;
+              color: white;
+              border-radius: 50%;
+              padding: 2px 6px;
+              font-size: 0.75rem;
+              position: absolute;
+              top: -5px;
+              right: -10px;">0</span>
+                    </div>
+                    Notificaciones
+                </h2>
 
                 <div class="filtros-container">
                     <div class="filtro-grupo">
@@ -112,6 +136,7 @@
                             <option value="media">Media</option>
                             <option value="alta">Alta</option>
                             <option value="critica">Crítica</option>
+                            <option value="no-leidas">No leidas</option>
                         </select>
                     </div>
 
@@ -131,8 +156,10 @@
                     <button id="limpiarFiltros" class="btn-limpiar">
                         <i class="fas fa-times-circle"></i> Limpiar
                     </button>
+                    <button id="filtrarNoLeidas" class="btn-no-leidas" style="margin-left: 10px;">
+                        No leídas
                 </div>
-            </div> 
+            </div>
             <div id="contenedor-notificaciones" class="contenedor-notificaciones"></div>
         </section>
 
@@ -141,16 +168,15 @@
                 <h3>Agregar Nueva Máquina</h3>
                 <label for="newMachineName">Nombre</label>
                 <input type="text" id="newMachineName" placeholder="Nombre de la máquina" required />
-
                 <label for="newMachineDesc">Descripción</label>
                 <textarea id="newMachineDesc" rows="3" placeholder="Descripción de la máquina"></textarea>
-
                 <div class="modal-buttons">
                     <button id="cancelMachineBtn" class="btn-secondary"><i class="fas fa-ban"></i> Cancelar</button>
                     <button id="saveMachineBtn" class="btn-primary"><i class="fas fa-save"></i> Agregar</button>
                 </div>
             </div>
         </div>
+
 
         <div id="modalDetalleNotificacion" class="modal" style="display: none;">
             <div class="modal-content detalle-modal-content">
@@ -165,6 +191,7 @@
                         <img id="detalle-imagen" src="" alt="Evidencia del reporte" style="display: none;">
                     </div>
                 </div>
+                <p><strong>Reportado por:</strong> <span id="detalle-reportante"></span></p>
                 <p><strong>Máquina:</strong> <span id="detalle-maquina"></span></p>
                 <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
                 <p><strong>Hora:</strong> <span id="detalle-hora"></span></p>
