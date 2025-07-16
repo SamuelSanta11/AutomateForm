@@ -24,5 +24,11 @@ router.get('/notificaciones/:id', controller.getNotificaciones); //Obtener
 
 //Ruta informacion de la notificacion
 router.get('/detalle-reporte/:id', controller.getDetalleReporte);//Obtener
+router.get('/contador-notificaciones/:id', controller.getContadorNotificaciones);//Obtener
+router.put('/marcar-leida/:id', controller.marcarNotificacionLeida);//Actualizar
+
+
+
+
 
 module.exports = router;

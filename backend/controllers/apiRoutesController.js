@@ -93,20 +93,21 @@ const enviarReporte = async (req, res) => {
       fecha_incidente,
       hora_incidente,
       causas,
-      nivel_peligro,  
-      descripcion
+      nivel_peligro,
+      descripcion,
+      nombre_reportante
     } = req.body;
 
     //Validar todos los campos
-    if (!usuario_id || !maquina_id || !fecha_incidente || !hora_incidente) {
+    if (!usuario_id || !maquina_id || !fecha_incidente || !hora_incidente || !nombre_reportante) {
       return res.status(400).json({ message: 'Datos incompletos.' });
     }
 
     const result = await pool.query(
       `INSERT INTO formularios_incidente (
         usuario_id, maquina_id, nombre_maquina, fecha_incidente,
-        hora_incidente, causas, nivel_peligro, descripcion
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        hora_incidente, causas, nivel_peligro, descripcion, nombre_reportante
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id`,
       [
         usuario_id,
@@ -116,13 +117,14 @@ const enviarReporte = async (req, res) => {
         hora_incidente,
         causas,
         nivel_peligro,
-        descripcion
+        descripcion,
+        nombre_reportante || 'Anonimo'
       ]
     );
 
     const formulario_id = result.rows[0].id;
 
-    //Guardar imagene en tabla evidencias
+    //Guardar imagenes en tabla evidencias
     if (req.file) {
       const imagenPath = path.join('uploads', req.file.filename);
       await pool.query(
@@ -146,7 +148,7 @@ const enviarReporte = async (req, res) => {
     }
 
     res.status(201).json({ success: true, message: 'Reporte enviado con éxito.' });
-z
+
   } catch (error) {
     console.error('Error al enviar reporte:', error);
     res.status(500).json({ success: false, message: 'Error al enviar el reporte.' });
@@ -155,18 +157,21 @@ z
 
 //Evento para obtener notificaciones
 const getNotificaciones = async (req, res) => {
+  const userId = req.params.id;
   try {
     const result = await pool.query(`
-      SELECT n.id AS id, n.mensaje, n.creada_en
-      FROM notificaciones n
-      ORDER BY n.creada_en DESC
-    `);
+      SELECT * FROM notificaciones 
+      WHERE usuario_id = $1 
+      ORDER BY creada_en DESC
+    `, [userId]);
+
     res.json(result.rows);
   } catch (error) {
     console.error('Error al obtener notificaciones:', error);
-    res.status(500).json({ error: 'Error al obtener notificaciones.' });
+    res.status(500).json({ message: 'Error al obtener notificaciones' });
   }
 };
+
 
 //Evento para ver informacion del reporte
 const getDetalleReporte = async (req, res) => {
@@ -174,7 +179,8 @@ const getDetalleReporte = async (req, res) => {
 
   try {
     const query = `
-      SELECT f.id, f.usuario_id, f.maquina_id, m.nombre AS nombre_maquina,
+      SELECT f.id, f.usuario_id, f.maquina_id, f.nombre_reportante,
+             m.nombre AS nombre_maquina,
              f.fecha_incidente, f.hora_incidente, f.causas,
              f.nivel_peligro, f.descripcion, e.imagen_path
       FROM notificaciones n
@@ -187,16 +193,55 @@ const getDetalleReporte = async (req, res) => {
     const { rows } = await pool.query(query, [notificacionId]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ message: 'No se encontró el informacion del reporte.' });
+      return res.status(404).json({ message: 'No se encontró el información del reporte.' });
     }
 
     res.json(rows[0]);
 
   } catch (error) {
     console.error('Error al obtener detalle del reporte:', error);
-    res.status(500).json({ message: 'Error del servidor al obtener la informacion del reporte.' });
+    res.status(500).json({ message: 'Error del servidor al obtener la información del reporte.' });
   }
 };
+
+//Evento para obtener el numero de notificaciones no leidas
+const getContadorNotificaciones = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const result = await pool.query(`
+      SELECT COUNT(*) FROM notificaciones 
+      WHERE usuario_id = $1 AND leida = false
+    `, [userId]);
+
+    res.json({ cantidad: parseInt(result.rows[0].count) });
+  } catch (error) {
+    console.error('Error al contar notificaciones:', error);
+    res.status(500).json({ message: 'Error al contar notificaciones' });
+  }
+};
+
+const marcarNotificacionLeida = async (req, res) => {
+  const notificacionId = req.params.id
+
+  try {
+    const result = await pool.query(`
+      UPDATE notificaciones SET leida = true WHERE id = $1 RETURNING *`,
+      [notificacionId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(400).json({ message: 'Notificacion no encontrada' })
+    }
+
+    res.json({ message: 'Notificacion marcada como leida' })
+
+  } catch (error) {
+    console.error('Error al marcar como leida', error)
+    res.status(500).json({message: 'Error en el servidor'})
+  }
+}
+
 
 
 module.exports = {
@@ -206,6 +251,8 @@ module.exports = {
   deleteMaquina,
   enviarReporte,
   getNotificaciones,
-  getDetalleReporte
+  getDetalleReporte,
+  getContadorNotificaciones,
+  marcarNotificacionLeida
 };
 
