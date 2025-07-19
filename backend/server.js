@@ -8,20 +8,19 @@ const routes = require('./routes/apiRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Ruta principal redirige al login
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend', 'login.html'));
+});
 
 // Capturar frontend HTML CSS JS
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Capturar imágenes o archivos subidos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Ruta principal para servir index.html
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
-});
 
 // Rutas API
 app.use('/api', routes);
@@ -45,7 +44,6 @@ pool.connect(async (err, client, release) => {
 });
 
 // Iniciar servidor Ctrl + J node server.js
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en http://192.168.13.39:${PORT}`);
 });
-
