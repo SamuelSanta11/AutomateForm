@@ -76,11 +76,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const rol = document.getElementById('rol')?.value;
 
             if (username && password && rol) {
-                fetch('http://localhost:3000/api/login', {
+                fetch('http://192.168.13.39:3000/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 })
+
                     .then(response => {
                         if (!response.ok) throw new Error('Credenciales inválidas');
                         return response.json();
@@ -190,11 +191,12 @@ if (saveMachineBtn) {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/maquinas', {
+            const response = await fetch('http://192.168.13.39:3000/api/maquinas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre, descripcion })
             });
+
 
             if (!response.ok) throw new Error('Error al crear la máquina');
 
@@ -238,7 +240,7 @@ if (saveMachineBtn) {
 
 async function cargarMaquinasEnSelect() {
     try {
-        const response = await fetch('http://localhost:3000/api/maquinas');
+        const response = await fetch('http://192.168.13.39:3000/api/maquinas');
         const maquinas = await response.json();
 
         const machineSelect = document.getElementById('machineSelect');
@@ -305,9 +307,10 @@ if (deleteMachineBtn) {
 
         if (confirm.isConfirmed) {
             try {
-                const response = await fetch(`http://localhost:3000/api/maquinas/${selectedId}`, {
+                const response = await fetch(`http://192.168.13.39:3000/api/maquinas/${selectedId}`, {
                     method: 'DELETE'
                 });
+
 
                 if (!response.ok) throw new Error('Error al eliminar máquina');
 
@@ -430,10 +433,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch('http://localhost:3000/api/enviar-reporte', {
+                const response = await fetch('http://192.168.13.39:3000/api/enviar-reporte', {
                     method: 'POST',
                     body: formData
                 });
+
 
                 if (!response.ok) throw new Error('Error al enviar el reporte.');
 
@@ -445,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 reportForm.reset();
-                
+
                 const imagenInput = document.getElementById('imagen');
                 imagenInput.value = '';
 
@@ -463,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dragDropArea = document.querySelector('.drag-drop-area');
                 if (dragDropArea) {
                     dragDropArea.classList.remove('success', 'has-file');
-                    dragDropArea.classList.remove('highlight'); 
+                    dragDropArea.classList.remove('highlight');
                 }
 
                 const dragTextSpan = document.querySelector('.drag-text span');
@@ -480,8 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                
-                imagenInput.value = ''; 
+
+                imagenInput.value = '';
                 document.getElementById('previewImage').src = '';
                 document.getElementById('previewImage').style.display = 'none';
                 document.querySelector('.uploaded-image-preview').style.display = 'none';
@@ -515,7 +519,7 @@ async function cargarNotificaciones() {
     if (!user || !user.id) return;
 
     try {
-        const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
+        const response = await fetch(`http://192.168.13.39:3000/api/notificaciones/${user.id}`);
         const notificaciones = await response.json();
 
         const contenedor = document.getElementById('contenedor-notificaciones');
@@ -571,9 +575,10 @@ async function cargarNotificaciones() {
 
                 if (!noti.leida) {
                     try {
-                        await fetch(`http://localhost:3000/api/marcar-leida/${noti.id}`, {
+                        await fetch(`http://192.168.13.39:3000/api/marcar-leida/${noti.id}`, {
                             method: 'PUT'
                         });
+
 
                         contadorNoLeidas--;
                         if (contadorNoLeidas <= 0) {
@@ -606,7 +611,7 @@ async function cargarNotificaciones() {
 
 async function mostrarDetalleNotificacion(idNotificacion) {
     try {
-        const response = await fetch(`http://localhost:3000/api/detalle-reporte/${idNotificacion}`);
+        const response = await fetch(`http://192.168.13.39:3000/api/detalle-reporte/${idNotificacion}`);
         if (!response.ok) throw new Error('No se pudo obtener el detalle del reporte');
 
         const data = await response.json();
@@ -625,7 +630,7 @@ async function mostrarDetalleNotificacion(idNotificacion) {
         const dragText = detailImageArea.querySelector('span');
 
         if (data.imagen_path) {
-            imagen.src = `http://localhost:3000/${data.imagen_path}`;
+            imagen.src = `http://192.168.13.39:3000/${data.imagen_path}`;
             imagen.style.display = 'block';
             detailImageArea.classList.add('has-file');
             dragIcon.classList.remove('fa-cloud-upload-alt');
@@ -655,9 +660,15 @@ async function mostrarDetalleNotificacion(idNotificacion) {
 }
 
 // Cerrar modal
-document.getElementById("cerrarModalDetalle").addEventListener("click", () => {
-    document.getElementById("modalDetalleNotificacion").style.display = "none";
+document.addEventListener("DOMContentLoaded", () => {
+    const cerrarBtn = document.getElementById("cerrarModalDetalle");
+    if (cerrarBtn) {
+        cerrarBtn.addEventListener("click", () => {
+            document.getElementById("modalDetalleNotificacion").style.display = "none";
+        });
+    }
 });
+
 
 //Evento para arrastrar y soltar archivos
 function initDragAndDrop() {
@@ -744,8 +755,9 @@ document.getElementById('aplicarFiltros').addEventListener('click', async () => 
     if (!user || !user.id) return;
 
     try {
-        const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
+        const response = await fetch(`http://192.168.13.39:3000/api/notificaciones/${user.id}`);
         const notificaciones = await response.json();
+
 
         const filtradas = notificaciones.filter(noti => {
             const notiFecha = new Date(noti.creada_en).toISOString().split('T')[0];
@@ -796,9 +808,10 @@ document.getElementById('aplicarFiltros').addEventListener('click', async () => 
 
                 if (!noti.leida) {
                     try {
-                        await fetch(`http://localhost:3000/api/marcar-leida/${noti.id}`, {
+                        await fetch(`http://192.168.13.39:3000/api/marcar-leida/${noti.id}`, {
                             method: 'PUT'
                         });
+
 
 
                         const contadorSpan = document.getElementById('contador-notificaciones');
@@ -842,7 +855,7 @@ document.getElementById('filtrarNoLeidas').addEventListener('click', async () =>
     if (!user || !user.id) return;
 
     try {
-        const response = await fetch(`http://localhost:3000/api/notificaciones/${user.id}`);
+        const response = await fetch(`http://192.168.13.39:3000/api/notificaciones/${user.id}`);
         const notificaciones = await response.json();
 
         const noLeidas = notificaciones.filter(n => !n.leida);
@@ -880,9 +893,10 @@ document.getElementById('filtrarNoLeidas').addEventListener('click', async () =>
                 if (!noti.id || isNaN(noti.id)) return;
 
                 try {
-                    await fetch(`http://localhost:3000/api/marcar-leida/${noti.id}`, {
+                    await fetch(`http://192.168.13.39:3000/api/marcar-leida/${noti.id}`, {
                         method: 'PUT'
                     });
+
 
                     const contadorSpan = document.getElementById('contador-notificaciones');
                     if (contadorSpan && contadorSpan.textContent > 0) {
